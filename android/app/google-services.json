@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "218297721418",
+    "project_id": "fitopia-42331",
+    "storage_bucket": "fitopia-42331.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:218297721418:android:25e6b2ec677f2fa16b7cb3",
+        "android_client_info": {
+          "package_name": "com.example.fitopia"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAFaoICmTSW9U5oMSniu2afWUD7NER-5f0"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

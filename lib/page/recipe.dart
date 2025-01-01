@@ -38,92 +38,119 @@ class RecipeListPage extends StatelessWidget {
           backgroundColor: Colors.transparent,
           elevation: 0,
         ),
-        body: FutureBuilder<QuerySnapshot>(
-          future: FirebaseFirestore.instance.collection('recipes').get(),
-          builder: (context, snapshot) {
-            if (snapshot.connectionState == ConnectionState.waiting) {
-              return const Center(child: CircularProgressIndicator());
-            }
+        body: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            const Padding(
+              padding: EdgeInsets.all(16.0),
+              child: Text(
+                'Recipes For You',
+                style: TextStyle(
+                  color: Color(0xFF514B23),
+                  fontSize: 24,
+                  fontWeight: FontWeight.w500,
+                ),
+              ),
+            ),
+            Expanded(
+              child: FutureBuilder<QuerySnapshot>(
+                future: FirebaseFirestore.instance.collection('recipes').get(),
+                builder: (context, snapshot) {
+                  if (snapshot.connectionState == ConnectionState.waiting) {
+                    return const Center(child: CircularProgressIndicator());
+                  }
 
-            if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
-              return const Center(child: Text('No recipes found'));
-            }
+                  if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                    return const Center(child: Text('No recipes found'));
+                  }
 
-            final recipes = snapshot.data!.docs;
+                  final recipes = snapshot.data!.docs;
 
-            return ListView.builder(
-              padding: const EdgeInsets.all(16.0),
-              itemCount: recipes.length,
-              itemBuilder: (context, index) {
-                final recipe = recipes[index];
-                final title = recipe['title'];
-                final imageUrl = recipe['imageUrl'];
-                final time = recipe['time'];
-                final calories = recipe['calories'];
-                final details = "$time | $calories";
+                  return ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    itemCount: recipes.length,
+                    itemBuilder: (context, index) {
+                      final recipe = recipes[index];
+                      final recipeData = recipe.data() as Map<String, dynamic>;
 
-                return GestureDetector(
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => RecipeDetailPage(
-                          title: title,
-                          imageUrl: imageUrl,
-                          details: details,
-                          ingredients: recipe['ingredients'],
-                          instructions: recipe['instructions'], 
-                          recipeId: '',
-                        ),
-                      ),
-                    );
-                  },
-                  child: Card(
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    margin: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Row(
-                      children: [
-                        ClipRRect(
-                          borderRadius: const BorderRadius.only(
-                            topLeft: Radius.circular(12.0),
-                            bottomLeft: Radius.circular(12.0),
+                      // Extract data with null safety
+                      final title = recipeData['title'] ?? 'Untitled Recipe';
+                      final imageUrl = recipeData['imageUrl'] ?? '';
+                      final time = recipeData['time'] ?? 'Unknown time';
+                      final calories = recipeData['calories'] ?? 'Unknown calories';
+                      final details = "$time | $calories";
+
+                      return GestureDetector(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => RecipeDetailPage(
+                                recipeId: recipe.id,
+                                title: title,
+                                imageUrl: imageUrl,
+                                details: details,
+                                ingredients: recipeData['ingredients'] ?? 'No ingredients provided.',
+                                instructions: recipeData['instructions'] ?? 'No instructions provided.',
+                              ),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          shape: RoundedRectangleBorder(
+                            borderRadius: BorderRadius.circular(12.0),
                           ),
-                          child: Image.network(
-                            imageUrl,
-                            width: 175,
-                            height: 100,
-                            fit: BoxFit.cover,
-                            errorBuilder: (context, error, stackTrace) =>
-                                const Icon(Icons.image, size: 50),
-                          ),
-                        ),
-                        const SizedBox(width: 12.0),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                          margin: const EdgeInsets.symmetric(vertical: 8.0),
+                          child: Row(
                             children: [
-                              Text(
-                                title,
-                                style: const TextStyle(
-                                  fontSize: 16.0,
-                                  fontWeight: FontWeight.bold,
-                                  color: Color.fromRGBO(81, 75, 35, 1),
+                              ClipRRect(
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(12.0),
+                                  bottomLeft: Radius.circular(12.0),
+                                ),
+                                child: Image.network(
+                                  imageUrl,
+                                  width: 100,
+                                  height: 100,
+                                  fit: BoxFit.cover,
+                                  errorBuilder: (context, error, stackTrace) =>
+                                      const Icon(Icons.image, size: 50),
                                 ),
                               ),
-                              const SizedBox(height: 8.0),
-                              Text(details),
+                              const SizedBox(width: 12.0),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      title,
+                                      style: const TextStyle(
+                                        fontSize: 16.0,
+                                        fontWeight: FontWeight.bold,
+                                        color: Color.fromRGBO(81, 75, 35, 1),
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8.0),
+                                    Text(
+                                      details,
+                                      style: const TextStyle(
+                                        fontSize: 14.0,
+                                        color: Colors.grey,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
                             ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
-                );
-              },
-            );
-          },
+                      );
+                    },
+                  );
+                },
+              ),
+            ),
+          ],
         ),
         floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
         floatingActionButton: SizedBox(

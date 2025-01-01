@@ -7,6 +7,7 @@ import 'package:google_fonts/google_fonts.dart' as gfonts;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:fitopia/toast.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class FillProfile extends StatefulWidget {
   const FillProfile({super.key});
@@ -22,7 +23,8 @@ class _FillProfileState extends State<FillProfile> {
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   File? _image;
   final picker = ImagePicker();
@@ -101,11 +103,11 @@ class _FillProfileState extends State<FillProfile> {
                   Text(
                     'Fill Your Profile',
                     style: gfonts.GoogleFonts.getFont(
-                    'League Spartan',
-                    color: const Color(0xFF656839),
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      'League Spartan',
+                      color: const Color(0xFF656839),
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                   const SizedBox(height: 10),
                   const Text(
@@ -118,29 +120,36 @@ class _FillProfileState extends State<FillProfile> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  GestureDetector(
-                    onTap: _pickImage,
-                    child: CircleAvatar(
-                      radius: 60,
-                      backgroundImage: _image == null
-                          ? const NetworkImage('https://via.placeholder.com/125')
-                          : FileImage(_image!) as ImageProvider,
-                      child: _image == null
-                          ? const Icon(
-                              Icons.camera_alt,
-                              size: 40,
-                              color: Colors.grey,
-                            )
-                          : null,
-                    ),
-                  ),
+                  // GestureDetector(
+                  //   onTap: _pickImage,
+                  //   child: CircleAvatar(
+                  //     radius: 60,
+                  //     backgroundImage: _image == null
+                  //         ? const NetworkImage(
+                  //             'https://via.placeholder.com/125')
+                  //         : FileImage(_image!) as ImageProvider,
+                  //     child: _image == null
+                  //         ? const Icon(
+                  //             Icons.camera_alt,
+                  //             size: 40,
+                  //             color: Colors.grey,
+                  //           )
+                  //         : null,
+                  //   ),
+                  // ),
                   const SizedBox(height: 20),
-                  _buildInputField('Full name', fullNameController, hintText: 'Enter full name'),
-                  _buildInputField('Nickname', nicknameController, hintText: 'Enter nickname'),
-                  _buildInputField('Email', emailController, isEmail: true, hintText: 'Enter email'),
-                  _buildInputField('Mobile Number', mobileController, hintText: 'Enter mobile number'),
-                  _buildInputField('Password', passwordController, isPassword: true, hintText: 'Enter password'),
-                  _buildInputField('Confirm Password', confirmPasswordController,
+                  _buildInputField('Full name', fullNameController,
+                      hintText: 'Enter full name'),
+                  _buildInputField('Nickname', nicknameController,
+                      hintText: 'Enter nickname'),
+                  _buildInputField('Email', emailController,
+                      isEmail: true, hintText: 'Enter email'),
+                  // _buildInputField('Mobile Number', mobileController,
+                  //     hintText: 'Enter mobile number'),
+                  _buildInputField('Password', passwordController,
+                      isPassword: true, hintText: 'Enter password'),
+                  _buildInputField(
+                      'Confirm Password', confirmPasswordController,
                       isPassword: true, hintText: 'Confirm password'),
                   const SizedBox(height: 30),
                   GestureDetector(
@@ -156,11 +165,13 @@ class _FillProfileState extends State<FillProfile> {
                       ),
                       child: Center(
                         child: isSigningUp
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
                             : const Text(
                                 "Register",
                                 style: TextStyle(
-                                    color: Colors.white, fontWeight: FontWeight.bold),
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
                               ),
                       ),
                     ),
@@ -175,7 +186,8 @@ class _FillProfileState extends State<FillProfile> {
                         onTap: () {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => const LoginPage()),
+                            MaterialPageRoute(
+                                builder: (context) => const LoginPage()),
                             (route) => false,
                           );
                         },
@@ -203,8 +215,10 @@ class _FillProfileState extends State<FillProfile> {
       isSigningUp = true;
     });
 
-    String username = fullNameController.text;
+    String fullName = fullNameController.text;
+    String nickname = nicknameController.text;
     String email = emailController.text;
+    String mobileNumber = mobileController.text;
     String password = passwordController.text;
     String confirmPassword = confirmPasswordController.text;
 
@@ -218,18 +232,36 @@ class _FillProfileState extends State<FillProfile> {
       return;
     }
 
-    User? user = await _auth.signUpWithEmailAndPassword(email, password, username);
+    User? user =
+        await _auth.signUpWithEmailAndPassword(email, password, fullName);
+
+    if (user != null) {
+      // Add user data to Firestore
+      try {
+        await FirebaseFirestore.instance
+            .collection('users') // Firestore collection
+            .doc(user.uid) // Use UID as the document ID
+            .set({
+          'fullName': fullName,
+          'nickname': nickname,
+          'email': email,
+          'mobileNumber': mobileNumber,
+          'photoURL': user.photoURL ?? '', // Handle optional photo URL
+          'createdAt': FieldValue.serverTimestamp(), // Add timestamp
+        });
+
+        showToast(message: "User is successfully created");
+        Navigator.pushNamed(context, "/home");
+      } catch (e) {
+        showToast(message: "Error storing user data: $e");
+      }
+    } else {
+      showToast(message: "Some error happened");
+    }
 
     setState(() {
       isSigningUp = false;
     });
-
-    if (user != null) {
-      showToast(message: "User is successfully created");
-      Navigator.pushNamed(context, "/home");
-    } else {
-      showToast(message: "Some error happened");
-    }
   }
 
   // Helper to create input fields
@@ -252,7 +284,8 @@ class _FillProfileState extends State<FillProfile> {
           TextFormField(
             controller: controller,
             obscureText: isPassword,
-            keyboardType: isEmail ? TextInputType.emailAddress : TextInputType.text,
+            keyboardType:
+                isEmail ? TextInputType.emailAddress : TextInputType.text,
             decoration: InputDecoration(
               hintText: hintText,
               border: OutlineInputBorder(

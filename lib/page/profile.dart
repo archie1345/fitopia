@@ -144,7 +144,7 @@ class _ProfilePageState extends State<ProfilePage> {
               alignment: Alignment.center,
               children: [
                 Container(
-                  height: 250,
+                  height: 100,
                   decoration: const BoxDecoration(
                     color: Color.fromRGBO(81, 75, 35,1),
                     borderRadius: BorderRadius.vertical(
@@ -154,15 +154,15 @@ class _ProfilePageState extends State<ProfilePage> {
                 ),
                 Column(
                   children: [
-                    GestureDetector(
-                      onTap: _pickImage,
-                      child: CircleAvatar(
-                        radius: 60,
-                        backgroundImage: _image == null
-                            ? const NetworkImage('https://via.placeholder.com/125')
-                            : FileImage(_image!) as ImageProvider,
-                      ),
-                    ),
+                    // GestureDetector(
+                    //   onTap: _pickImage,
+                    //   child: CircleAvatar(
+                    //     radius: 60,
+                    //     backgroundImage: _image == null
+                    //         ? const NetworkImage('https://via.placeholder.com/125')
+                    //         : FileImage(_image!) as ImageProvider,
+                    //   ),
+                    // ),
                     const SizedBox(height: 10),
                     Text(
                       _nameController.text.isEmpty

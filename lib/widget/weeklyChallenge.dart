@@ -18,7 +18,7 @@ class WeeklyChallenge extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       height: MediaQuery.of(context).size.height * 0.25,
-      color: Colors.grey[200],
+      color: const Color.fromRGBO(189, 219, 208, 1),
       padding: const EdgeInsets.all(16.0),
 
       child: Column(

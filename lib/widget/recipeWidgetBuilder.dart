@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart' as gfonts;
 
 class Recipe {
   final String title;
@@ -29,60 +30,79 @@ class RecipeDetailPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text("Back"),
+        surfaceTintColor: Colors.white,
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back),
+          iconSize: 18,
+          icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Navigator.pop(context);
+            Navigator.pushNamed(context, '/recipe');
           },
         ),
-      ),
-      body: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: SingleChildScrollView(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              ClipRRect(
-                borderRadius: BorderRadius.circular(12.0),
-                child: Image.network(
-                  recipe.image,
-                  width: double.infinity,
-                  height: 200,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 200), // Placeholder for invalid URLs
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              Text(
-                recipe.title,
-                style: const TextStyle(
-                  fontSize: 20.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 16.0),
-              const Text(
-                "Ingredients:",
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              Text(recipe.ingredients),
-              const SizedBox(height: 16.0),
-              const Text(
-                "Instructions:",
-                style: TextStyle(
-                  fontSize: 16.0,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-              const SizedBox(height: 8.0),
-              Text(recipe.instructions),
-            ],
+        title: Text(
+          'Back',
+          style: gfonts.GoogleFonts.getFont(
+            'League Spartan',
+            color: const Color(0xFF656839),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
+      body: SingleChildScrollView(
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            ClipRRect(
+              borderRadius: const BorderRadius.vertical(bottom: Radius.circular(30.0)),
+              child: Image.network(
+                recipe.image,
+                width: double.infinity,
+                height: 200,
+                fit: BoxFit.cover,
+                errorBuilder: (context, error, stackTrace) => const Icon(Icons.image, size: 200), // Placeholder for invalid URLs
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    recipe.title,
+                    style: const TextStyle(
+                      fontSize: 20.0,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(81, 75, 35, 1),
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  const Text(
+                    "Ingredients:",
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(101, 104, 57, 1),
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(recipe.ingredients),
+                  const SizedBox(height: 16.0),
+                  const Text(
+                    "Instructions:",
+                    style: TextStyle(
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.bold,
+                      color: Color.fromRGBO(101, 104, 57, 1),
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(recipe.instructions),
+                ],
+              ),
+            ),
+          ],
         ),
       ),
     );

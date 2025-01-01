@@ -59,24 +59,32 @@ class _ProfilePageState extends State<ProfilePage> {
   }
 
   Future<void> _updateProfile() async {
-    User? user = _auth.currentUser;
-    if (user != null) {
-      await _firestore.collection('users').doc(user.uid).update({
-        'username': _nameController.text,
-        'weight': int.parse(_weightController.text),
-        'height': int.parse(_heightController.text),
-        'birthdate': _birthdateController.text,
-      });
+    if (_nameController.text.isEmpty ||
+        _weightController.text.isEmpty ||
+        _heightController.text.isEmpty ||
+        _birthdateController.text.isEmpty) {
+      showToast(message: "Please fill all the fields.");
+      return;
+    }
 
-      if (_image != null) {
-        // Upload the image to Firebase Storage and update the user's profile picture URL
+    try {
+      User? user = _auth.currentUser;
+      if (user != null) {
+        await _firestore.collection('users').doc(user.uid).update({
+          'username': _nameController.text,
+          'weight': int.parse(_weightController.text),
+          'height': int.parse(_heightController.text),
+          'birthdate': _birthdateController.text,
+        });
+
+        setState(() {
+          _age = _calculateAge(_birthdateController.text);
+        });
+
+        showToast(message: "Profile updated successfully");
       }
-
-      setState(() {
-        _age = _calculateAge(_birthdateController.text);
-      });
-
-      showToast(message: "Profile updated successfully");
+    } catch (e) {
+      showToast(message: "Error updating profile: $e");
     }
   }
 
@@ -85,7 +93,8 @@ class _ProfilePageState extends State<ProfilePage> {
       DateTime birthDate = DateTime.parse(birthdate);
       DateTime today = DateTime.now();
       int age = today.year - birthDate.year;
-      if (today.month < birthDate.month || (today.month == birthDate.month && today.day < birthDate.day)) {
+      if (today.month < birthDate.month ||
+          (today.month == birthDate.month && today.day < birthDate.day)) {
         age--;
       }
       return age;
@@ -107,160 +116,164 @@ class _ProfilePageState extends State<ProfilePage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-          surfaceTintColor: Colors.white,
-          leading: IconButton(
-            iconSize: 18,
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.pop(context);
-            },
-          ),
-          title: Text(
-            'Back',
-            style: gfonts.GoogleFonts.getFont(
-              'League Spartan',
-              color: const Color(0xFF656839),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
+        surfaceTintColor: Colors.white,
+        leading: IconButton(
+          iconSize: 18,
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pop(context);
+          },
         ),
-
+        title: Text(
+          'Back',
+          style: gfonts.GoogleFonts.getFont(
+            'League Spartan',
+            color: const Color(0xFF656839),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
+          ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       backgroundColor: const Color(0xFFFAFAFA),
       body: SingleChildScrollView(
-        padding: const EdgeInsets.symmetric(horizontal: 16),
-        child: Padding(
-          padding: const EdgeInsets.only(bottom: 54),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.center,
-            children: [
-              // Profile Header
-              Stack(
-                alignment: Alignment.center,
-                children: [
-                  Container(
-                    height: 250,
-                    decoration: const BoxDecoration(
-                      color: Color(0xFF8E8CF3),
-                      borderRadius: BorderRadius.vertical(
-                        bottom: Radius.circular(40),
-                      ),
+        child: Column(
+          children: [
+            Stack(
+              alignment: Alignment.center,
+              children: [
+                Container(
+                  height: 250,
+                  decoration: const BoxDecoration(
+                    color: Color.fromRGBO(81, 75, 35,1),
+                    borderRadius: BorderRadius.vertical(
+                      bottom: Radius.circular(40),
                     ),
                   ),
-                  Column(
-                    children: [
-                      GestureDetector(
-                        onTap: _pickImage,
-                        child: CircleAvatar(
-                          radius: 60,
-                          backgroundImage: _image == null
-                              ? const NetworkImage('https://via.placeholder.com/125')
-                              : FileImage(_image!) as ImageProvider,
-                        ),
-                      ),
-                      Text(
-                        _nameController.text.isEmpty
-                            ? 'Madison Smith'
-                            : _nameController.text,
-                        style: gfonts.GoogleFonts.poppins(
-                          fontSize: 20,
-                          color: Colors.white,
-                          fontWeight: FontWeight.w600,
-                        ),
-                      ),
-                      Text(
-                        'madison@example.com\nBirthday: ${_birthdateController.text}',
-                        textAlign: TextAlign.center,
-                        style: gfonts.GoogleFonts.poppins(
-                          color: Colors.white,
-                          fontSize: 12,
-                        ),
-                      ),
-                    ],
-                  ),
-                ],
-              ),
-          
-              // Metrics Section
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
-                  decoration: BoxDecoration(
-                    color: Colors.black,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceAround,
-                    children: [
-                      _buildMetricTile('${_weightController.text} KG', 'Weight'),
-                      _buildMetricTile('$_age', 'Years Old'),
-                      _buildMetricTile('${_heightController.text} CM', 'Height'),
-                    ],
-                  ),
                 ),
-              ),
-          
-              // Input Fields
-              _buildInputField('Full name', _nameController, hintText: 'Enter full name'),
-              _buildInputField('Weight', _weightController, hintText: 'Enter weight (kg)', isNumber: true),
-              _buildInputField('Height', _heightController, hintText: 'Enter height (cm)', isNumber: true),
-              _buildInputField('Birthdate', _birthdateController, hintText: 'Enter birthdate (YYYY-MM-DD)', isDate: true),
-          
-              const SizedBox(height: 20),
-          
-              // Update Profile Button
-              GestureDetector(
-                onTap: _updateProfile,
-                child: Container(
-                  width: double.infinity,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF8E8CF3),
-                    borderRadius: BorderRadius.circular(25),
-                  ),
-                  child: Center(
-                    child: Text(
-                      "Update Profile",
+                Column(
+                  children: [
+                    GestureDetector(
+                      onTap: _pickImage,
+                      child: CircleAvatar(
+                        radius: 60,
+                        backgroundImage: _image == null
+                            ? const NetworkImage('https://via.placeholder.com/125')
+                            : FileImage(_image!) as ImageProvider,
+                      ),
+                    ),
+                    const SizedBox(height: 10),
+                    Text(
+                      _nameController.text.isEmpty
+                          ? 'Madison Smith'
+                          : _nameController.text,
+                      style: gfonts.GoogleFonts.poppins(
+                        fontSize: 20,
+                        color: Colors.white,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 5),
+                    Text(
+                      'madison@example.com\nBirthday: ${_birthdateController.text}',
+                      textAlign: TextAlign.center,
                       style: gfonts.GoogleFonts.poppins(
                         color: Colors.white,
-                        fontWeight: FontWeight.bold,
-                        fontSize: 16,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ),
+              ],
+            ),
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.center,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 12),
+                      decoration: BoxDecoration(
+                        color: Color.fromRGBO(203, 201, 173, 1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.spaceAround,
+                        children: [
+                          _buildMetricTile('${_weightController.text} KG', 'Weight'),
+                          _buildMetricTile('$_age', 'Years Old'),
+                          _buildMetricTile('${_heightController.text} CM', 'Height'),
+                        ],
                       ),
                     ),
                   ),
-                ),
+                  _buildInputField('Full name', _nameController,
+                      hintText: 'Enter full name'),
+                  _buildInputField('Weight', _weightController,
+                      hintText: 'Enter weight (kg)', isNumber: true),
+                  _buildInputField('Height', _heightController,
+                      hintText: 'Enter height (cm)', isNumber: true),
+                  _buildInputField('Birthdate', _birthdateController,
+                      hintText: 'Enter birthdate (YYYY-MM-DD)', isDate: true),
+                  const SizedBox(height: 20),
+                  GestureDetector(
+                    onTap: _updateProfile,
+                    child: Container(
+                      width: double.infinity,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF8E8CF3),
+                        borderRadius: BorderRadius.circular(25),
+                      ),
+                      child: Center(
+                        child: Text(
+                          "Update Profile",
+                          style: gfonts.GoogleFonts.poppins(
+                            color: Colors.white,
+                            fontWeight: FontWeight.bold,
+                            fontSize: 16,
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 20),
+                ],
               ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
   }
 
   Widget _buildMetricTile(String value, String label) {
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      children: [
-        Text(
-          value,
-          style: gfonts.GoogleFonts.poppins(
-            color: Colors.white,
-            fontSize: 18,
-            fontWeight: FontWeight.bold,
+    return Padding(
+      padding: const EdgeInsets.all(8.0),
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Text(
+            value,
+            style: gfonts.GoogleFonts.poppins(
+              color: const Color.fromARGB(255, 255, 255, 255),
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          label,
-          style: gfonts.GoogleFonts.poppins(
-            color: Colors.white70,
-            fontSize: 12,
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: gfonts.GoogleFonts.poppins(
+              color: const Color.fromARGB(137, 255, 255, 255),
+              fontSize: 12,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -281,13 +294,18 @@ class _ProfilePageState extends State<ProfilePage> {
           ),
           TextFormField(
             controller: controller,
-            keyboardType: isNumber ? TextInputType.number : isDate ? TextInputType.datetime : TextInputType.text,
+            keyboardType: isNumber
+                ? TextInputType.number
+                : isDate
+                    ? TextInputType.datetime
+                    : TextInputType.text,
             decoration: InputDecoration(
               hintText: hintText,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(15),
               ),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
             ),
           ),
         ],

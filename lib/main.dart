@@ -1,5 +1,6 @@
 import 'package:firebase_core/firebase_core.dart';
 import 'package:fitopia/page/getStarted.dart';
+import 'package:fitopia/page/recipe.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:fitopia/page/home.dart';
@@ -27,7 +28,7 @@ class MyApp extends StatelessWidget {
         textTheme: gfonts.GoogleFonts.leagueSpartanTextTheme(), // Apply font to text theme
       ),
         debugShowCheckedModeBanner: false,
-        title: 'Flutter Firebase',
+        title: 'Fitopia',
         routes: {
         '/': (context) => const SplashScreen(
         // Here, you can decide whether to show the LoginPage or HomePage based on user authentication
@@ -36,6 +37,7 @@ class MyApp extends StatelessWidget {
         '/login': (context) => const LoginPage(),
         '/signUp': (context) => const GetStarted(),
         '/home': (context) => const HomePage(),
+        '/recipe': (context) => const RecipeListPage(),
         },
       );
     }

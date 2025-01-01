@@ -1,5 +1,8 @@
 import 'package:fitopia/widget/recipeWidgetBuilder.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart' as gfonts; // Use a prefix for google_fonts
+
+
 
 class RecipeListPage extends StatelessWidget {
   const RecipeListPage({super.key});
@@ -59,8 +62,26 @@ class RecipeListPage extends StatelessWidget {
       },
       child: Scaffold(
         appBar: AppBar(
-          title: const Text("Nutrition"),
-        ),
+            surfaceTintColor: Colors.white,
+            leading: IconButton(
+              iconSize: 18,
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () {
+              Navigator.pushNamed(context, '/home');
+            },
+            ),
+            title: Text(
+              'Back',
+              style: gfonts.GoogleFonts.getFont(
+                'League Spartan',
+                color: const Color(0xFF656839),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: Colors.transparent,
+            elevation: 0,
+          ),
         body: ListView.builder(
           padding: const EdgeInsets.all(16.0),
           itemCount: recipes.length,
@@ -105,6 +126,7 @@ class RecipeListPage extends StatelessWidget {
                             style: const TextStyle(
                               fontSize: 16.0,
                               fontWeight: FontWeight.bold,
+                              color: Color.fromRGBO(81, 75, 35, 1)
                             ),
                           ),
                           const SizedBox(height: 8.0),

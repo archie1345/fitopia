@@ -51,7 +51,7 @@ class HomePage extends StatelessWidget {
                           style: TextStyle(
                             fontSize: 24,
                             fontWeight: FontWeight.bold,
-                            color: Colors.green[800],
+                            color: const Color.fromRGBO(81, 75, 35, 1),
                           ),
                         ),
                         const Text(

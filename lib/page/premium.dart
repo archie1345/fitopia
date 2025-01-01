@@ -14,8 +14,8 @@ class PremiumPage extends StatelessWidget {
               iconSize: 18,
               icon: const Icon(Icons.arrow_back_ios),
               onPressed: () {
-                Navigator.pop(context);
-              },
+              Navigator.pushNamed(context, '/home');
+            },
             ),
             title: Text(
               'Back',

@@ -263,16 +263,16 @@ class _UpperBodyState extends State<UpperBody> {
               );
             },
           )
-        : Center(
-            child: Text(
-              'No workouts available for $selectedDifficulty',
-              style: const TextStyle(
-                fontSize: 16,
-                fontWeight: FontWeight.bold,
+            : Center(
+                child: Text(
+                  'No workouts available for $selectedDifficulty',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
               ),
             ),
-          ),
-        )
             ],
           ),
         ),

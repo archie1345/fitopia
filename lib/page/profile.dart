@@ -225,7 +225,7 @@ class _ProfilePageState extends State<ProfilePage> {
                       width: double.infinity,
                       height: 50,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF8E8CF3),
+                        color: const Color.fromRGBO(81, 75, 35, 1),
                         borderRadius: BorderRadius.circular(25),
                       ),
                       child: Center(

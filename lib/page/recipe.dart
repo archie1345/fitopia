@@ -1,3 +1,6 @@
+import 'package:fitopia/page/home.dart';
+import 'package:fitopia/page/settings.dart';
+import 'package:fitopia/widget/floatingNavBar.dart';
 import 'package:fitopia/widget/recipeWidgetBuilder.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts; // Use a prefix for google_fonts
@@ -82,6 +85,7 @@ class RecipeListPage extends StatelessWidget {
             backgroundColor: Colors.transparent,
             elevation: 0,
           ),
+          
         body: ListView.builder(
           padding: const EdgeInsets.all(16.0),
           itemCount: recipes.length,
@@ -139,6 +143,21 @@ class RecipeListPage extends StatelessWidget {
               ),
             );
           },
+        ),
+        floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
+        floatingActionButton: SizedBox(
+          width: MediaQuery.of(context).size.width * 0.5,
+          child: FloatingNavigationBar(
+            onHomePressed: () => Navigator.pushAndRemoveUntil(
+              context,
+              MaterialPageRoute(builder: (context) => const HomePage()),
+              (route) => false,
+            ),
+            onSettingsPressed: () => Navigator.push(
+              context,
+              MaterialPageRoute(builder: (context) => const SettingPage()),
+            ),
+          ),
         ),
       ),
     );

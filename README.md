@@ -1,10 +1,10 @@
-# fitopia
+# FITOPIA
 
 A new Flutter project.
 
 ## Getting Started
 
-This project is a starting point for a Flutter application.
+This project aims to focused on organizing and tracking workout and meal plan routines. The Fitness and Meal Planner Mobile Application is designed primarily for individuals seeking to improve their fitness and overall physical well-being.
 
 A few resources to get you started if this is your first Flutter project:
 

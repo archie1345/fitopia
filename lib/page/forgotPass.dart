@@ -10,14 +10,16 @@ class ForgotPassword extends StatelessWidget {
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
     // Firebase Auth instance
-    final FirebaseAuth _auth = FirebaseAuth.instance;
+    final FirebaseAuth auth = FirebaseAuth.instance;
 
     void handleSubmit() async {
       if (formKey.currentState!.validate()) {
         try {
-          await _auth.sendPasswordResetEmail(email: emailController.text.trim());
+          await auth.sendPasswordResetEmail(email: emailController.text.trim());
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Password reset email sent to ${emailController.text}')),
+            SnackBar(
+                content: Text(
+                    'Password reset email sent to ${emailController.text}')),
           );
         } catch (e) {
           String message = 'An error occurred';
@@ -113,7 +115,8 @@ class ForgotPassword extends StatelessWidget {
                     validator: (value) {
                       if (value == null || value.isEmpty) {
                         return 'Please enter your email';
-                      } else if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$").hasMatch(value)) {
+                      } else if (!RegExp(r"^[a-zA-Z0-9+_.-]+@[a-zA-Z0-9.-]+$")
+                          .hasMatch(value)) {
                         return 'Enter a valid email';
                       }
                       return null;

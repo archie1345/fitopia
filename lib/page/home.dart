@@ -1,5 +1,4 @@
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitopia/page/nutrition.dart';
 import 'package:fitopia/widget/workoutCard.dart';
 import 'package:flutter/material.dart';
 import 'package:fitopia/page/premium.dart';
@@ -33,7 +32,8 @@ class HomePage extends StatelessWidget {
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.symmetric(vertical:32), // Space for the navigation bar
+        padding: const EdgeInsets.symmetric(
+            vertical: 32), // Space for the navigation bar
         child: SingleChildScrollView(
           child: Column(
             children: [
@@ -61,11 +61,13 @@ class HomePage extends StatelessWidget {
                       ],
                     ),
                     IconButton(
-                      icon: const Icon(Icons.account_circle, size: 50, color: Colors.black87),
+                      icon: const Icon(Icons.account_circle,
+                          size: 50, color: Colors.black87),
                       onPressed: () {
                         Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const ProfilePage()),
+                          MaterialPageRoute(
+                              builder: (context) => const ProfilePage()),
                         );
                       },
                     ),
@@ -80,22 +82,30 @@ class HomePage extends StatelessWidget {
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const RecipeListPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const RecipeListPage()),
                       );
                     },
                     child: Column(
-                      children: const [Icon(Icons.restaurant), Text('Nutrition')],
+                      children: const [
+                        Icon(Icons.restaurant),
+                        Text('Nutrition')
+                      ],
                     ),
                   ),
                   InkWell(
                     onTap: () {
                       Navigator.push(
                         context,
-                        MaterialPageRoute(builder: (context) => const PremiumPage()),
+                        MaterialPageRoute(
+                            builder: (context) => const PremiumPage()),
                       );
                     },
                     child: Column(
-                      children: const [Icon(Icons.card_membership), Text('Premium')],
+                      children: const [
+                        Icon(Icons.card_membership),
+                        Text('Premium')
+                      ],
                     ),
                   ),
                 ],
@@ -116,16 +126,19 @@ class HomePage extends StatelessWidget {
                     children: [
                       WorkoutCard(
                         title: 'Upper Body',
-                        imageUrl: 'https://images.pexels.com/photos/29575475/pexels-photo-29575475/free-photo-of-muscular-man-exercising-with-gym-equipment.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
+                        imageUrl:
+                            'https://images.pexels.com/photos/29575475/pexels-photo-29575475/free-photo-of-muscular-man-exercising-with-gym-equipment.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
                         duration: '1-2 mins',
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const UpperBody()),
+                          MaterialPageRoute(
+                              builder: (context) => const UpperBody()),
                         ),
                       ),
                       WorkoutCard(
                         title: 'Core',
-                        imageUrl: 'https://example.com', // Replace with a valid URL
+                        imageUrl:
+                            'https://example.com', // Replace with a valid URL
                         duration: '1-2 mins',
                         onTap: () => Navigator.push(
                           context,
@@ -134,11 +147,13 @@ class HomePage extends StatelessWidget {
                       ),
                       WorkoutCard(
                         title: 'Lower Body',
-                        imageUrl: 'https://example.com', // Replace with a valid URL
+                        imageUrl:
+                            'https://example.com', // Replace with a valid URL
                         duration: '1-2 mins',
                         onTap: () => Navigator.push(
                           context,
-                          MaterialPageRoute(builder: (context) => const LowerBody()),
+                          MaterialPageRoute(
+                              builder: (context) => const LowerBody()),
                         ),
                       ),
                     ],
@@ -149,7 +164,8 @@ class HomePage extends StatelessWidget {
               WeeklyChallenge(
                 title: 'Weekly Challenge',
                 description: 'Plank With Hip Twist',
-                imageUrl: 'https://example.com/challenge', // Replace with a valid URL
+                imageUrl:
+                    'https://example.com/challenge', // Replace with a valid URL
                 onTap: () => _launchURL('https://example.com/challenge'),
               ),
               // Articles & Tips Section
@@ -165,12 +181,16 @@ class HomePage extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () => _launchURL('https://example.com/daily-routines'),
-                      child: _buildArticleCard(context, 'Daily Routines', 'https://via.placeholder.com/250x150'),
+                      onTap: () =>
+                          _launchURL('https://example.com/daily-routines'),
+                      child: _buildArticleCard(context, 'Daily Routines',
+                          'https://via.placeholder.com/250x150'),
                     ),
                     GestureDetector(
-                      onTap: () => _launchURL('https://example.com/supplement-guide'),
-                      child: _buildArticleCard(context, 'Supplement Guide', 'https://via.placeholder.com/250x150'),
+                      onTap: () =>
+                          _launchURL('https://example.com/supplement-guide'),
+                      child: _buildArticleCard(context, 'Supplement Guide',
+                          'https://via.placeholder.com/250x150'),
                     ),
                   ],
                 ),
@@ -180,7 +200,8 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
+      floatingActionButtonLocation:
+          FloatingActionButtonLocation.miniCenterFloat,
       floatingActionButton: SizedBox(
         width: MediaQuery.of(context).size.width * 0.5,
         child: FloatingNavigationBar(
@@ -195,11 +216,11 @@ class HomePage extends StatelessWidget {
           ),
         ),
       ),
-      
     );
   }
 
-  Widget _buildArticleCard(BuildContext context, String title, String imageUrl) {
+  Widget _buildArticleCard(
+      BuildContext context, String title, String imageUrl) {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 8.0),
       width: MediaQuery.of(context).size.width * 0.45,
@@ -241,8 +262,6 @@ class HomePage extends StatelessWidget {
               ),
             ),
           ),
-
-          
         ],
       ),
     );

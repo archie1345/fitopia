@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart' as gfonts; // Use a prefix for google_fonts
-
+import 'package:google_fonts/google_fonts.dart'
+    as gfonts; // Use a prefix for google_fonts
 
 class PremiumPage extends StatelessWidget {
   const PremiumPage({super.key});
@@ -9,26 +9,26 @@ class PremiumPage extends StatelessWidget {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-            surfaceTintColor: Colors.white,
-            leading: IconButton(
-              iconSize: 18,
-              icon: const Icon(Icons.arrow_back_ios),
-              onPressed: () {
-              Navigator.pushNamed(context, '/home');
-            },
-            ),
-            title: Text(
-              'Back',
-              style: gfonts.GoogleFonts.getFont(
-                'League Spartan',
-                color: const Color(0xFF656839),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            backgroundColor: Colors.transparent,
-            elevation: 0,
+        surfaceTintColor: Colors.white,
+        leading: IconButton(
+          iconSize: 18,
+          icon: const Icon(Icons.arrow_back_ios),
+          onPressed: () {
+            Navigator.pushNamed(context, '/home');
+          },
+        ),
+        title: Text(
+          'Back',
+          style: gfonts.GoogleFonts.getFont(
+            'League Spartan',
+            color: const Color(0xFF656839),
+            fontSize: 18,
+            fontWeight: FontWeight.w600,
           ),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
@@ -146,7 +146,7 @@ class PremiumPage extends StatelessWidget {
 
 // Dummy Payment Page
 class PaymentPage extends StatelessWidget {
-  const PaymentPage({Key? key}) : super(key: key);
+  const PaymentPage({super.key});
 
   @override
   Widget build(BuildContext context) {

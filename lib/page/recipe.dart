@@ -76,8 +76,12 @@ class RecipeListPage extends StatelessWidget {
                       // Extract data with null safety
                       final title = recipeData['title'] ?? 'Untitled Recipe';
                       final imageUrl = recipeData['imageUrl'] ?? '';
+                      final recipeDetail =
+                          recipeData['recipe_detail'] as Map<String, dynamic>?;
+
                       final time = recipeData['time'] ?? 'Unknown time';
-                      final calories = recipeData['calories'] ?? 'Unknown calories';
+                      final calories =
+                          recipeData['calories'] ?? 'Unknown calories';
                       final details = "$time | $calories";
 
                       return GestureDetector(
@@ -86,12 +90,7 @@ class RecipeListPage extends StatelessWidget {
                             context,
                             MaterialPageRoute(
                               builder: (context) => RecipeDetailPage(
-                                recipeId: recipe.id,
-                                title: title,
-                                imageUrl: imageUrl,
-                                details: details,
-                                ingredients: recipeData['ingredients'] ?? 'No ingredients provided.',
-                                instructions: recipeData['instructions'] ?? 'No instructions provided.',
+                                recipeId: recipe.id, // Pass the actual ID
                               ),
                             ),
                           );
@@ -152,7 +151,8 @@ class RecipeListPage extends StatelessWidget {
             ),
           ],
         ),
-        floatingActionButtonLocation: FloatingActionButtonLocation.miniCenterFloat,
+        floatingActionButtonLocation:
+            FloatingActionButtonLocation.miniCenterFloat,
         floatingActionButton: SizedBox(
           width: MediaQuery.of(context).size.width * 0.5,
           child: FloatingNavigationBar(

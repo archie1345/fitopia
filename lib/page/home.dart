@@ -1,4 +1,5 @@
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitopia/page/nutrition.dart';
 import 'package:fitopia/widget/workoutCard.dart';
 import 'package:flutter/material.dart';
 import 'package:fitopia/page/premium.dart';

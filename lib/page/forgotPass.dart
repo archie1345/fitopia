@@ -1,18 +1,37 @@
 import 'package:flutter/material.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class ForgotPassword extends StatelessWidget {
+  const ForgotPassword({super.key});
+
   @override
   Widget build(BuildContext context) {
     final TextEditingController emailController = TextEditingController();
     final GlobalKey<FormState> formKey = GlobalKey<FormState>();
 
-    void handleSubmit() {
+    // Firebase Auth instance
+    final FirebaseAuth _auth = FirebaseAuth.instance;
+
+    void handleSubmit() async {
       if (formKey.currentState!.validate()) {
-        // Handle email submission
-        print('Email: ${emailController.text}');
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Email sent to ${emailController.text}')),
-        );
+        try {
+          await _auth.sendPasswordResetEmail(email: emailController.text.trim());
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text('Password reset email sent to ${emailController.text}')),
+          );
+        } catch (e) {
+          String message = 'An error occurred';
+          if (e is FirebaseAuthException) {
+            if (e.code == 'user-not-found') {
+              message = 'No user found for this email.';
+            } else if (e.code == 'invalid-email') {
+              message = 'Invalid email address.';
+            }
+          }
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text(message)),
+          );
+        }
       }
     }
 
@@ -53,7 +72,7 @@ class ForgotPassword extends StatelessWidget {
                 ),
                 SizedBox(height: 20),
                 Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                  'Please enter your email address below to receive a password reset link.',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     color: Colors.black,

@@ -1,5 +1,7 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/page/forgotPass.dart';
+import 'package:fitopia/page/home.dart';
 import 'package:flutter/material.dart';
 import 'package:fitopia/page/getStarted.dart';
 import 'package:fitopia/widget/form_container_widget.dart';
@@ -36,38 +38,36 @@ class _LoginPageState extends State<LoginPage> {
         return false;
       },
       child: Scaffold(
+        resizeToAvoidBottomInset: true, // Prevent keyboard-related overflow
         backgroundColor: Colors.white,
-        // appBar: AppBar(
-        //   automaticallyImplyLeading: false,
-        //   title: const Text("Login"),
-        // ),
-        body: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 15,vertical: 30),
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.start,
-            children: [
-              Padding(
-                padding: const EdgeInsets.only(bottom: 30,top: 30),
-                child: Container(
-                  alignment: Alignment.topCenter,
-                  child: Text(
+        body: SafeArea(
+          child: SingleChildScrollView(
+            child: Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 15, vertical: 30),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.start,
+                children: [
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 30, top: 30),
+                    child: Container(
+                      alignment: Alignment.topCenter,
+                      child: Text(
                         'LOGIN',
                         textAlign: TextAlign.center,
                         style: gfonts.GoogleFonts.getFont(
-                        'Montserrat',
-                        color: const Color(0xFF656839),
-                        fontSize: 17,
-                        fontWeight: FontWeight.bold,
-                        height: 0.88,
-                        letterSpacing: 7,
+                          'Montserrat',
+                          color: const Color(0xFF656839),
+                          fontSize: 17,
+                          fontWeight: FontWeight.bold,
+                          height: 0.88,
+                          letterSpacing: 7,
+                        ),
                       ),
                     ),
                   ),
-                ),
-              
-              Padding(
-                padding: const EdgeInsets.only(bottom: 30,top: 30),
-                child: Text(
+                  Padding(
+                    padding: const EdgeInsets.only(bottom: 30, top: 30),
+                    child: Text(
                       'WELCOME',
                       textAlign: TextAlign.center,
                       style: gfonts.GoogleFonts.getFont(
@@ -79,11 +79,12 @@ class _LoginPageState extends State<LoginPage> {
                         letterSpacing: 7,
                       ),
                     ),
-              ),
-              Padding(
-                padding: const EdgeInsets.only(top: 15,bottom: 40,left: 15,right: 15),
-                child:  Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. ',
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 15, vertical: 15),
+                    child: Text(
+                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
                       textAlign: TextAlign.center,
                       style: gfonts.GoogleFonts.getFont(
                         'League Spartan',
@@ -93,55 +94,55 @@ class _LoginPageState extends State<LoginPage> {
                         height: 1,
                         letterSpacing: 7,
                       ),
+                    ),
                   ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 40,
-                  alignment: Alignment.bottomLeft,
-                  child: Text(
-                              'Username',
-                              style: TextStyle(
-                                color: Color(0xFF514B23),
-                                fontSize: 15,
-                                fontFamily: 'League Spartan',
-                                fontWeight: FontWeight.w500,
-                                height: 0.83,
-                              ),
-                            ),
-                ),
-              ),
-              FormContainerWidget(
-                controller: _usernameController,
-                hintText: "Username",
-                isPasswordField: false,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
-                  height: 40,
-                  alignment: Alignment.bottomLeft,
-                  child: Text(
-                              'Password',
-                              style: TextStyle(
-                                color: Color(0xFF514B23),
-                                fontSize: 15,
-                                fontFamily: 'League Spartan',
-                                fontWeight: FontWeight.w500,
-                                height: 0.83,
-                              ),
-                            ),
-                ),
-              ),
-              FormContainerWidget(
-                controller: _passwordController,
-                hintText: "Password",
-                isPasswordField: true,
-              ),
-              Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Container(
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: 40,
+                      alignment: Alignment.bottomLeft,
+                      child: const Text(
+                        'Email',
+                        style: TextStyle(
+                          color: Color(0xFF514B23),
+                          fontSize: 15,
+                          fontFamily: 'League Spartan',
+                          fontWeight: FontWeight.w500,
+                          height: 0.83,
+                        ),
+                      ),
+                    ),
+                  ),
+                  FormContainerWidget(
+                    controller: _usernameController,
+                    hintText: "Email",
+                    isPasswordField: false,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
+                      height: 40,
+                      alignment: Alignment.bottomLeft,
+                      child: const Text(
+                        'Password',
+                        style: TextStyle(
+                          color: Color(0xFF514B23),
+                          fontSize: 15,
+                          fontFamily: 'League Spartan',
+                          fontWeight: FontWeight.w500,
+                          height: 0.83,
+                        ),
+                      ),
+                    ),
+                  ),
+                  FormContainerWidget(
+                    controller: _passwordController,
+                    hintText: "Password",
+                    isPasswordField: true,
+                  ),
+                  Padding(
+                    padding: const EdgeInsets.all(8.0),
+                    child: Container(
                       height: 20,
                       width: double.infinity,
                       alignment: Alignment.topLeft,
@@ -149,7 +150,8 @@ class _LoginPageState extends State<LoginPage> {
                         onTap: () {
                           Navigator.push(
                             context,
-                            MaterialPageRoute(builder: (context) => ForgotPassword()),
+                            MaterialPageRoute(
+                                builder: (context) => ForgotPassword()),
                           );
                         },
                         child: const Text(
@@ -165,74 +167,72 @@ class _LoginPageState extends State<LoginPage> {
                         ),
                       ),
                     ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  _signIn();
-                },
-                 
-                  child: Center(
-                    child: _isSigning ? const CircularProgressIndicator(
-                      strokeCap: StrokeCap.round,
-                      color: Color.fromRGBO(81, 75, 35, 1),) : Container(
-                        alignment: Alignment.center,
-                        width: 125,
-                        height: 30,
-                        decoration: BoxDecoration(
-                        color: const Color.fromRGBO(217, 217, 217, 1),
-                        borderRadius: BorderRadius.circular(40),
-                      ),
-                        child: const Text(
-                        "Login",
-                          style: TextStyle(
-                          color: Color.fromRGBO(81, 75, 35, 1),
-                          fontWeight: FontWeight.bold,
-                      ),
+                  ),
+                  GestureDetector(
+                    onTap: _signIn,
+                    child: Center(
+                      child: _isSigning
+                          ? const CircularProgressIndicator(
+                              strokeCap: StrokeCap.round,
+                              color: Color.fromRGBO(81, 75, 35, 1),
+                            )
+                          : Container(
+                              alignment: Alignment.center,
+                              width: 125,
+                              height: 30,
+                              decoration: BoxDecoration(
+                                color: const Color.fromRGBO(217, 217, 217, 1),
+                                borderRadius: BorderRadius.circular(40),
+                              ),
+                              child: const Text(
+                                "Login",
+                                style: TextStyle(
+                                  color: Color.fromRGBO(81, 75, 35, 1),
+                                  fontWeight: FontWeight.bold,
+                                ),
+                              ),
+                            ),
                     ),
                   ),
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsets.all(10.0),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Text('Doesn’t have an account? ',
-                            style: TextStyle(
-                              color: Color(0xFF514B23),
-                              fontSize: 14,
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.w400,
-                              height: 1.07,
-                            ),
-                      ),
-                  
-                    GestureDetector(
-                      onTap: () {
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => const GetStarted()),
-                              (route) => false,
-                        );
-                      },
-                      child: const Text(
-                        "Sign Up",
+                  const SizedBox(height: 10),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      const Text(
+                        'Doesn’t have an account? ',
                         style: TextStyle(
-                              color: Color(0xFF514B23),
-                              fontSize: 14,
-                              fontFamily: 'Montserrat',
-                              fontWeight: FontWeight.w700,
-                              height: 1.07,
-                            ),
+                          color: Color(0xFF514B23),
+                          fontSize: 14,
+                          fontFamily: 'Montserrat',
+                          fontWeight: FontWeight.w400,
+                          height: 1.07,
+                        ),
                       ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                margin: const EdgeInsets.all(10),
-                child: const Text(
-                  'or sign up with',
+                      GestureDetector(
+                        onTap: () {
+                          Navigator.pushAndRemoveUntil(
+                            context,
+                            MaterialPageRoute(
+                                builder: (context) => const GetStarted()),
+                            (route) => false,
+                          );
+                        },
+                        child: const Text(
+                          "Sign Up",
+                          style: TextStyle(
+                            color: Color(0xFF514B23),
+                            fontSize: 14,
+                            fontFamily: 'Montserrat',
+                            fontWeight: FontWeight.w700,
+                            height: 1.07,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 20),
+                  const Text(
+                    'or sign up with',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF514B23),
@@ -241,27 +241,30 @@ class _LoginPageState extends State<LoginPage> {
                       fontWeight: FontWeight.w300,
                       height: 1,
                     ),
-                ),
-              ),
-              GestureDetector(
-                onTap: () {
-                  FirebaseAuthService().signInWithGoogle(context);
-        
-                },
-                child: Container(
-                  width: 50,
-                  height: 50,
-                  decoration: BoxDecoration(
-                    color: Color.fromRGBO(81, 75, 35, 1),
-                    borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Center(
-                    child: Icon(FontAwesomeIcons.google, color: Colors.white,),
+                  const SizedBox(height: 10),
+                  GestureDetector(
+                    onTap: () {
+                      FirebaseAuthService().signInWithGoogle(context);
+                    },
+                    child: Container(
+                      width: 50,
+                      height: 50,
+                      decoration: BoxDecoration(
+                        color: const Color.fromRGBO(81, 75, 35, 1),
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: const Center(
+                        child: Icon(
+                          FontAwesomeIcons.google,
+                          color: Colors.white,
+                        ),
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
-              
-            ],
+            ),
           ),
         ),
       ),
@@ -284,12 +287,42 @@ class _LoginPageState extends State<LoginPage> {
 
     if (user != null) {
       showToast(message: "User is successfully signed in");
-      Navigator.pushNamed(context, "/home");
+      _checkSubscriptionStatus(user.uid);
     } else {
-      showToast(message: "some error occured");
+      showToast(message: "Some error occurred");
     }
   }
 
+  void _checkSubscriptionStatus(String userId) async {
+    try {
+      DocumentSnapshot subscriptionSnapshot = await FirebaseFirestore.instance
+          .collection('users')
+          .doc(userId)
+          .collection('subscription')
+          .doc('active')
+          .get();
 
+      if (subscriptionSnapshot.exists) {
+        Map<String, dynamic> data =
+            subscriptionSnapshot.data() as Map<String, dynamic>;
 
+        if (data['status'] == 'active') {
+          // User has an active subscription
+          Navigator.push(
+            context,
+            MaterialPageRoute(builder: (context) => HomePage()),
+          ); // Redirect to premium features
+        } else {
+          // No active subscription
+          Navigator.pushNamed(
+              context, "/subscriptionPage"); // Redirect to subscription page
+        }
+      } else {
+        // No subscription data found
+        Navigator.pushNamed(context, "/PremiumPage");
+      }
+    } catch (e) {
+      showToast(message: "Error checking subscription: $e");
+    }
+  }
 }

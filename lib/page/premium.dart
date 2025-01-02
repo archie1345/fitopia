@@ -1,46 +1,9 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart'
+    as gfonts; // Use a prefix for google_fonts
 
 class PremiumPage extends StatefulWidget {
   const PremiumPage({super.key});
-
-  @override
-  State<PremiumPage> createState() => _PremiumPageState();
-}
-
-class _PremiumPageState extends State<PremiumPage> {
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  // Function to handle subscription upgrade
-  Future<void> upgradeToPremium() async {
-    try {
-      final user = _auth.currentUser;
-      if (user == null) {
-        throw Exception("User not logged in");
-      }
-
-      // Add Firestore entry to indicate that the user is requesting the premium upgrade
-      await _firestore.collection('payments').add({
-        'userId': user.uid,
-        'status': 'paid',
-        'amount': 9.99, // Example amount
-        'plan': 'premium',
-        'createdAt': DateTime.now(),
-      });
-
-      // Show confirmation message
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-            content: Text("Thank you for upgrade to our premium features")),
-      );
-    } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text("Upgrade failed: $e")),
-      );
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -72,7 +35,7 @@ class _PremiumPageState extends State<PremiumPage> {
           children: [
             const Text(
               "Ready to transform your body and reach its peak?",
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
@@ -122,8 +85,12 @@ class _PremiumPageState extends State<PremiumPage> {
             const SizedBox(height: 20),
             // Premium Version Card
             GestureDetector(
-              onTap: () async {
-                await upgradeToPremium(); // Trigger Firestore update to start payment process
+              onTap: () {
+                // Navigate to Payment Page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(builder: (context) => const PaymentPage()),
+                );
               },
               child: Container(
                 decoration: BoxDecoration(

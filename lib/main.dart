@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fitopia/keys.dart';
 import 'package:fitopia/page/getStarted.dart';
 import 'package:fitopia/page/recipe.dart';
 import 'package:flutter/foundation.dart';
@@ -7,6 +8,7 @@ import 'package:fitopia/page/home.dart';
 import 'package:fitopia/page/login.dart';
 import 'package:fitopia/splashScreen.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
+import 'package:flutter_stripe/flutter_stripe.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -19,6 +21,10 @@ void main() async {
             projectId: "fitopia-42331"));
   }
   await Firebase.initializeApp();
+
+  Stripe.publishableKey = publish_key;
+  await Stripe.instance.applySettings();
+
   runApp(const MyApp());
 }
 

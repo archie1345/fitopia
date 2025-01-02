@@ -1,4 +1,3 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/page/forgotPass.dart';
 import 'package:fitopia/page/home.dart';
@@ -287,42 +286,12 @@ class _LoginPageState extends State<LoginPage> {
 
     if (user != null) {
       showToast(message: "User is successfully signed in");
-      _checkSubscriptionStatus(user.uid);
+      Navigator.push(
+        context,
+        MaterialPageRoute(builder: (context) => const HomePage()),
+      );
     } else {
       showToast(message: "Some error occurred");
-    }
-  }
-
-  void _checkSubscriptionStatus(String userId) async {
-    try {
-      DocumentSnapshot subscriptionSnapshot = await FirebaseFirestore.instance
-          .collection('users')
-          .doc(userId)
-          .collection('subscription')
-          .doc('active')
-          .get();
-
-      if (subscriptionSnapshot.exists) {
-        Map<String, dynamic> data =
-            subscriptionSnapshot.data() as Map<String, dynamic>;
-
-        if (data['status'] == 'active') {
-          // User has an active subscription
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => HomePage()),
-          ); // Redirect to premium features
-        } else {
-          // No active subscription
-          Navigator.pushNamed(
-              context, "/subscriptionPage"); // Redirect to subscription page
-        }
-      } else {
-        // No subscription data found
-        Navigator.pushNamed(context, "/PremiumPage");
-      }
-    } catch (e) {
-      showToast(message: "Error checking subscription: $e");
     }
   }
 }

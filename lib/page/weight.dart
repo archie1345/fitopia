@@ -1,3 +1,5 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/page/age.dart';
 import 'package:fitopia/page/height.dart';
 import 'package:flutter/material.dart';
@@ -11,9 +13,29 @@ class Weight extends StatefulWidget {
 }
 
 class _WeightState extends State<Weight> {
-  final FixedExtentScrollController _controller = FixedExtentScrollController(initialItem: 74);
+  final FixedExtentScrollController _controller =
+      FixedExtentScrollController(initialItem: 74);
 
-  int selectedWeight = 74; // Default selected weight (index 74 corresponds to 75 kg)
+  int selectedWeight =
+      74; // Default selected weight (index 74 corresponds to 75 kg)
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> _saveWeightToFirestore(String weight) async {
+    try {
+      final User? user = _auth.currentUser;
+      if (user != null) {
+        await _firestore.collection('users').doc(user.uid).update({
+          'weight': weight, // Save weight as a string
+        });
+        print("Weight updated successfully: $weight kg");
+      } else {
+        print("No user logged in.");
+      }
+    } catch (e) {
+      print("Error updating weight: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -53,7 +75,7 @@ class _WeightState extends State<Weight> {
           elevation: 0,
         ),
         body: Padding(
-            padding: const EdgeInsets.only(bottom: 54),
+          padding: const EdgeInsets.only(bottom: 54),
           child: Column(
             children: [
               Padding(
@@ -69,20 +91,20 @@ class _WeightState extends State<Weight> {
                 ),
               ),
               Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: SizedBox(
-                    width: 323,
-                    child: Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
-                      textAlign: TextAlign.center,
-                      style: gfonts.GoogleFonts.getFont(
-                        'League Spartan',
-                        color: const Color(0xFF656839),
-                        fontSize: 16,
-                      ),
+                padding: const EdgeInsets.all(16.0),
+                child: SizedBox(
+                  width: 323,
+                  child: Text(
+                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                    textAlign: TextAlign.center,
+                    style: gfonts.GoogleFonts.getFont(
+                      'League Spartan',
+                      color: const Color(0xFF656839),
+                      fontSize: 16,
                     ),
                   ),
                 ),
+              ),
               Spacer(),
               Container(
                 width: 250,
@@ -110,7 +132,7 @@ class _WeightState extends State<Weight> {
                 ),
               ),
               Padding(
-                padding: const EdgeInsets.only(top:16.0),
+                padding: const EdgeInsets.only(top: 16.0),
                 child: Container(
                   width: 46,
                   height: 32,
@@ -141,11 +163,14 @@ class _WeightState extends State<Weight> {
                           quarterTurns: -1,
                           child: Center(
                             child: AnimatedDefaultTextStyle(
-                              duration: const Duration(milliseconds: 150), // Smooth animation
+                              duration: const Duration(
+                                  milliseconds: 150), // Smooth animation
                               curve: Curves.easeInOut, // Animation curve
                               style: TextStyle(
                                 color: const Color(0xFF514B23),
-                                fontSize: index == selectedWeight ? 50 : 25, // Bold size for selected
+                                fontSize: index == selectedWeight
+                                    ? 50
+                                    : 25, // Bold size for selected
                                 fontFamily: 'Poppins',
                                 fontWeight: index == selectedWeight
                                     ? FontWeight.bold
@@ -163,29 +188,30 @@ class _WeightState extends State<Weight> {
               ),
               Spacer(),
               ElevatedButton(
-                      onPressed: () {
-                        // Handle Continue action
-                        Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(builder: (context) => HeightSelector()),
-                          (route) => false,
-                        );
-                      },
-                      style: ElevatedButton.styleFrom(
-                        foregroundColor: Colors.black,
-                        backgroundColor: Colors.white,
-                        padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
-                      ),
-                      child: Text(
-                        'Continue',
-                        style: gfonts.GoogleFonts.getFont(
-                          'Poppins',
-                          color: const Color(0xFF656839),
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                        ),
-                      ),
-                    ),
+                onPressed: () async {
+                  await _saveWeightToFirestore((selectedWeight + 1).toString());
+                  Navigator.pushAndRemoveUntil(
+                    context,
+                    MaterialPageRoute(builder: (context) => HeightSelector()),
+                    (route) => false,
+                  );
+                },
+                style: ElevatedButton.styleFrom(
+                  foregroundColor: Colors.black,
+                  backgroundColor: Colors.white,
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                ),
+                child: Text(
+                  'Continue',
+                  style: gfonts.GoogleFonts.getFont(
+                    'Poppins',
+                    color: const Color(0xFF656839),
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
             ],
           ),
         ),

@@ -1,19 +1,38 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/page/age.dart';
 import 'package:fitopia/page/getStarted.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart' as gfonts; // Use a prefix for google_fonts
+import 'package:google_fonts/google_fonts.dart' as gfonts;
 
 class GenderSelectionScreen extends StatefulWidget {
   const GenderSelectionScreen({super.key});
 
   @override
-  _GenderSelectionScreenState createState() =>
-      _GenderSelectionScreenState();
+  _GenderSelectionScreenState createState() => _GenderSelectionScreenState();
 }
 
 class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
   bool _isMaleSelected = false;
   bool _isFemaleSelected = false;
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  Future<void> _saveGenderToFirestore(String gender) async {
+    try {
+      final User? user = _auth.currentUser;
+      if (user != null) {
+        await _firestore.collection('users').doc(user.uid).update({
+          'gender': gender,
+        });
+        print("Gender updated successfully.");
+      } else {
+        print("No user logged in.");
+      }
+    } catch (e) {
+      print("Error updating gender: $e");
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -32,7 +51,10 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
             iconSize: 18,
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
-              Navigator.pushAndRemoveUntil(context, MaterialPageRoute(builder: (context) => GetStarted()), (route) => false);
+              Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => GetStarted()),
+                  (route) => false);
             },
           ),
           title: Text(
@@ -46,8 +68,6 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
           ),
           backgroundColor: Colors.transparent,
           elevation: 0,
-      
-      
         ),
         body: Center(
           child: Padding(
@@ -81,14 +101,16 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      _isMaleSelected = !_isMaleSelected;
+                      _isMaleSelected = true;
                       _isFemaleSelected = false;
                     });
                   },
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: _isMaleSelected ? const Color.fromRGBO(203, 201, 173, 1) : Colors.white,
+                      color: _isMaleSelected
+                          ? const Color.fromRGBO(203, 201, 173, 1)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(100),
                       boxShadow: const [
                         BoxShadow(
@@ -119,14 +141,16 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 GestureDetector(
                   onTap: () {
                     setState(() {
-                      _isFemaleSelected = !_isFemaleSelected;
+                      _isFemaleSelected = true;
                       _isMaleSelected = false;
                     });
                   },
                   child: Container(
                     padding: const EdgeInsets.all(20),
                     decoration: BoxDecoration(
-                      color: _isFemaleSelected ? const Color.fromRGBO(203, 201, 173, 1) : Colors.white,
+                      color: _isFemaleSelected
+                          ? const Color.fromRGBO(203, 201, 173, 1)
+                          : Colors.white,
                       borderRadius: BorderRadius.circular(100),
                       boxShadow: const [
                         BoxShadow(
@@ -153,11 +177,11 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                Spacer(),
+                const Spacer(),
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle Continue action
-                    print('Continue pressed');
+                  onPressed: () async {
+                    String selectedGender = _isMaleSelected ? 'Male' : 'Female';
+                    await _saveGenderToFirestore(selectedGender);
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(builder: (context) => Age()),
@@ -167,7 +191,8 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
                   ),
                   child: Text(
                     'Continue',

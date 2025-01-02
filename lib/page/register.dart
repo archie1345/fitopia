@@ -19,7 +19,7 @@ class FillProfile extends StatefulWidget {
 class _FillProfileState extends State<FillProfile> {
   // Controllers for form fields
   final TextEditingController fullNameController = TextEditingController();
-  final TextEditingController nicknameController = TextEditingController();
+  final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController mobileController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
@@ -45,8 +45,7 @@ class _FillProfileState extends State<FillProfile> {
 
   @override
   void dispose() {
-    fullNameController.dispose();
-    nicknameController.dispose();
+    usernameController.dispose();
     emailController.dispose();
     mobileController.dispose();
     passwordController.dispose();
@@ -138,10 +137,8 @@ class _FillProfileState extends State<FillProfile> {
                   //   ),
                   // ),
                   const SizedBox(height: 20),
-                  _buildInputField('Full name', fullNameController,
-                      hintText: 'Enter full name'),
-                  _buildInputField('Nickname', nicknameController,
-                      hintText: 'Enter nickname'),
+                  _buildInputField('Username', usernameController,
+                      hintText: 'Enter username'),
                   _buildInputField('Email', emailController,
                       isEmail: true, hintText: 'Enter email'),
                   // _buildInputField('Mobile Number', mobileController,
@@ -215,8 +212,7 @@ class _FillProfileState extends State<FillProfile> {
       isSigningUp = true;
     });
 
-    String fullName = fullNameController.text;
-    String nickname = nicknameController.text;
+    String username = usernameController.text;
     String email = emailController.text;
     String mobileNumber = mobileController.text;
     String password = passwordController.text;
@@ -233,7 +229,7 @@ class _FillProfileState extends State<FillProfile> {
     }
 
     User? user =
-        await _auth.signUpWithEmailAndPassword(email, password, fullName);
+        await _auth.signUpWithEmailAndPassword(email, password, username);
 
     if (user != null) {
       // Add user data to Firestore
@@ -242,8 +238,7 @@ class _FillProfileState extends State<FillProfile> {
             .collection('users') // Firestore collection
             .doc(user.uid) // Use UID as the document ID
             .set({
-          'fullName': fullName,
-          'nickname': nickname,
+          'username': username,
           'email': email,
           'mobileNumber': mobileNumber,
           'photoURL': user.photoURL ?? '', // Handle optional photo URL

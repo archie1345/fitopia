@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/widget/workoutCard.dart';
 import 'package:flutter/material.dart';
@@ -22,6 +23,39 @@ class HomePage extends StatelessWidget {
       await launchUrl(uri);
     } else {
       throw 'Could not launch $url';
+    }
+  }
+
+  // Function to check the subscription status
+  Future<void> _checkSubscriptionStatus(BuildContext context) async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      // If no user is logged in, navigate to the PremiumPage
+      Navigator.pushNamed(context, "/PremiumPage");
+      return;
+    }
+
+    try {
+      DocumentSnapshot subscriptionSnapshot = await FirebaseFirestore.instance
+          .collection('payment')
+          .doc(user.uid)
+          .get();
+
+      if (subscriptionSnapshot.exists) {
+        Map<String, dynamic> data =
+            subscriptionSnapshot.data() as Map<String, dynamic>;
+
+        if (data['status'] != 'paid') {
+          // If subscription is not active, redirect to PremiumPage
+          Navigator.pushNamed(context, "/PremiumPage");
+        }
+      } else {
+        // If subscription data is not found, redirect to PremiumPage
+        Navigator.pushNamed(context, "/PremiumPage");
+      }
+    } catch (e) {
+      // Handle error
+      print("Error checking subscription status: $e");
     }
   }
 
@@ -124,37 +158,54 @@ class HomePage extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
+                      // Upper Body Workout - Check subscription status before navigating
                       WorkoutCard(
                         title: 'Upper Body',
                         imageUrl:
                             'https://images.pexels.com/photos/29575475/pexels-photo-29575475/free-photo-of-muscular-man-exercising-with-gym-equipment.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
                         duration: '1-2 mins',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const UpperBody()),
-                        ),
+                        onTap: () async {
+                          await _checkSubscriptionStatus(context);
+                          if (FirebaseAuth.instance.currentUser != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const UpperBody()),
+                            );
+                          }
+                        },
                       ),
+                      // Core Workout - Check subscription status before navigating
                       WorkoutCard(
                         title: 'Core',
-                        imageUrl:
-                            'https://example.com', // Replace with a valid URL
+                        imageUrl: 'https://example.com',
                         duration: '1-2 mins',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(builder: (context) => const Core()),
-                        ),
+                        onTap: () async {
+                          await _checkSubscriptionStatus(context);
+                          if (FirebaseAuth.instance.currentUser != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const Core()),
+                            );
+                          }
+                        },
                       ),
+                      // Lower Body Workout - Check subscription status before navigating
                       WorkoutCard(
                         title: 'Lower Body',
-                        imageUrl:
-                            'https://example.com', // Replace with a valid URL
+                        imageUrl: 'https://example.com',
                         duration: '1-2 mins',
-                        onTap: () => Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const LowerBody()),
-                        ),
+                        onTap: () async {
+                          await _checkSubscriptionStatus(context);
+                          if (FirebaseAuth.instance.currentUser != null) {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                  builder: (context) => const LowerBody()),
+                            );
+                          }
+                        },
                       ),
                     ],
                   ),

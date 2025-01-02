@@ -1,9 +1,46 @@
+import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart'
-    as gfonts; // Use a prefix for google_fonts
 
-class PremiumPage extends StatelessWidget {
+class PremiumPage extends StatefulWidget {
   const PremiumPage({super.key});
+
+  @override
+  State<PremiumPage> createState() => _PremiumPageState();
+}
+
+class _PremiumPageState extends State<PremiumPage> {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  // Function to handle subscription upgrade
+  Future<void> upgradeToPremium() async {
+    try {
+      final user = _auth.currentUser;
+      if (user == null) {
+        throw Exception("User not logged in");
+      }
+
+      // Add Firestore entry to indicate that the user is requesting the premium upgrade
+      await _firestore.collection('payments').add({
+        'userId': user.uid,
+        'status': 'paid',
+        'amount': 9.99, // Example amount
+        'plan': 'premium',
+        'createdAt': DateTime.now(),
+      });
+
+      // Show confirmation message
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+            content: Text("Thank you for upgrade to our premium features")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Upgrade failed: $e")),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -14,14 +51,13 @@ class PremiumPage extends StatelessWidget {
           iconSize: 18,
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Navigator.pushNamed(context, '/home');
+            Navigator.pop(context);
           },
         ),
-        title: Text(
-          'Back',
-          style: gfonts.GoogleFonts.getFont(
-            'League Spartan',
-            color: const Color(0xFF656839),
+        title: const Text(
+          'Premium',
+          style: TextStyle(
+            color: Color(0xFF656839),
             fontSize: 18,
             fontWeight: FontWeight.w600,
           ),
@@ -34,7 +70,7 @@ class PremiumPage extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Text(
+            const Text(
               "Ready to transform your body and reach its peak?",
               style: TextStyle(
                 fontSize: 20,
@@ -43,7 +79,7 @@ class PremiumPage extends StatelessWidget {
               ),
             ),
             const SizedBox(height: 10),
-            Text(
+            const Text(
               "BENEFITS USING PREMIUM:",
               style: TextStyle(
                 fontSize: 16,
@@ -86,12 +122,8 @@ class PremiumPage extends StatelessWidget {
             const SizedBox(height: 20),
             // Premium Version Card
             GestureDetector(
-              onTap: () {
-                // Navigate to Payment Page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PaymentPage()),
-                );
+              onTap: () async {
+                await upgradeToPremium(); // Trigger Firestore update to start payment process
               },
               child: Container(
                 decoration: BoxDecoration(
@@ -138,27 +170,6 @@ class PremiumPage extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// Dummy Payment Page
-class PaymentPage extends StatelessWidget {
-  const PaymentPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Payment"),
-        backgroundColor: Colors.green[700],
-      ),
-      body: const Center(
-        child: Text(
-          "Payment Page",
-          style: TextStyle(fontSize: 18),
         ),
       ),
     );

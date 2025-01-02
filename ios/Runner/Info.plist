@@ -21,6 +21,8 @@
 		</array>
 	</dict>
 </array>
+	<key>SKPaymentTransactionObserver</key>
+	<string>YES</string>
 <!-- End of the Google Sign-in Section -->
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>

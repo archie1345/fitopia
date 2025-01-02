@@ -1,4 +1,5 @@
 import 'package:firebase_core/firebase_core.dart';
+import 'package:fitopia/keys.dart';
 import 'package:fitopia/page/getStarted.dart';
 import 'package:fitopia/page/recipe.dart';
 import 'package:flutter/foundation.dart';
@@ -7,13 +8,20 @@ import 'package:fitopia/page/home.dart';
 import 'package:fitopia/page/login.dart';
 import 'package:fitopia/splashScreen.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
+import 'package:flutter_stripe/flutter_stripe.dart';
+
 
 void main() async{
   WidgetsFlutterBinding.ensureInitialized();
+
   if(kIsWeb){
     await Firebase.initializeApp(options: const FirebaseOptions(apiKey: "AIzaSyCYEmD_YN8CmsWH8wNmfu8tHu9InagrMS4" , appId: "1:218297721418:web:c8ce12a52deab12f6b7cb3", messagingSenderId: "218297721418", projectId: "fitopia-42331"));
   }
   await Firebase.initializeApp();
+
+  Stripe.publishableKey = publish_key;
+  await Stripe.instance.applySettings();
+
   runApp(const MyApp());
 }
 

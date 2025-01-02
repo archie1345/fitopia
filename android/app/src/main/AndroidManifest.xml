@@ -8,9 +8,7 @@
             android:value="1:218297721418:android:25e6b2ec677f2fa16b7cb3"/>
         <meta-data
             android:name="com.google.android.gms.auth.api.signin.API_KEY"
-            android:value="AIzaSyAFaoICmTSW9U5oMSniu2afWUD7NER-5f0"/>
-        
-        
+            android:value="AIzaSyAFaoICmTSW9U5oMSniu2afWUD7NER-5f0"/>      
         <activity
             android:name=".MainActivity"
             android:exported="true"

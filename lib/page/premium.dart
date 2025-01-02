@@ -1,9 +1,46 @@
+import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart'
-    as gfonts; // Use a prefix for google_fonts
+import 'package:google_fonts/google_fonts.dart' as gfonts;
+import 'package:http/http.dart' as http;
+import 'package:url_launcher/url_launcher.dart';
 
 class PremiumPage extends StatelessWidget {
   const PremiumPage({super.key});
+
+  Future<void> _subscribe(BuildContext context, String planId) async {
+    bool isLoading = true;
+
+    try {
+      const String backendUrl = 'https://your-backend-url.com/create-checkout-session';
+
+      final response = await http.post(
+        Uri.parse(backendUrl),
+        headers: {'Content-Type': 'application/json'},
+        body: jsonEncode({'planId': planId}),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        final String checkoutUrl = data['checkoutUrl'];
+
+        // Display subscription confirmation or launch URL
+        if (await canLaunch(checkoutUrl)) {
+          await launch(checkoutUrl);
+        } else {
+          throw Exception('Could not launch $checkoutUrl');
+        }
+      } else {
+        throw Exception('Failed to create subscription session');
+      }
+    } catch (error) {
+      print('Error: $error');
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Subscription failed: $error')),
+      );
+    } finally {
+      isLoading = false;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -36,14 +73,14 @@ class PremiumPage extends StatelessWidget {
           children: [
             Text(
               "Ready to transform your body and reach its peak?",
-              style: TextStyle(
+              style: const TextStyle(
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
                 color: Colors.black87,
               ),
             ),
             const SizedBox(height: 10),
-            Text(
+            const Text(
               "BENEFITS USING PREMIUM:",
               style: TextStyle(
                 fontSize: 16,
@@ -86,13 +123,7 @@ class PremiumPage extends StatelessWidget {
             const SizedBox(height: 20),
             // Premium Version Card
             GestureDetector(
-              onTap: () {
-                // Navigate to Payment Page
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(builder: (context) => const PaymentPage()),
-                );
-              },
+              onTap: () => _subscribe(context, 'premium_plan_id'), // Use your plan ID here
               child: Container(
                 decoration: BoxDecoration(
                   color: const Color.fromRGBO(81, 75, 35, 1),
@@ -138,27 +169,6 @@ class PremiumPage extends StatelessWidget {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-// Dummy Payment Page
-class PaymentPage extends StatelessWidget {
-  const PaymentPage({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(
-        title: const Text("Payment"),
-        backgroundColor: Colors.green[700],
-      ),
-      body: const Center(
-        child: Text(
-          "Payment Page",
-          style: TextStyle(fontSize: 18),
         ),
       ),
     );

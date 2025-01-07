@@ -1,32 +1,32 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:fitopia/page/age.dart';
 import 'package:fitopia/page/height.dart';
+import 'package:fitopia/userRegistrationData.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
 
 class Weight extends StatefulWidget {
-  const Weight({super.key});
+  final UserRegistrationData userData;
+
+  const Weight({super.key, required this.userData});
 
   @override
   State<Weight> createState() => _WeightState();
 }
 
 class _WeightState extends State<Weight> {
-  final FixedExtentScrollController _controller =
-      FixedExtentScrollController(initialItem: 74);
+  final FixedExtentScrollController _controller = FixedExtentScrollController(initialItem: 74);
 
-  int selectedWeight =
-      74; // Default selected weight (index 74 corresponds to 75 kg)
+  int selectedWeight = 74;
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  Future<void> _saveWeightToFirestore(String weight) async {
+  Future<void> _saveWeightToFirestore(int weight) async {
     try {
       final User? user = _auth.currentUser;
       if (user != null) {
         await _firestore.collection('users').doc(user.uid).update({
-          'weight': weight, // Save weight as a string
+          'weight': weight,
         });
         print("Weight updated successfully: $weight kg");
       } else {
@@ -41,11 +41,7 @@ class _WeightState extends State<Weight> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => Age()),
-          (route) => false,
-        );
+        Navigator.pop(context);
         return false;
       },
       child: Scaffold(
@@ -55,11 +51,7 @@ class _WeightState extends State<Weight> {
             iconSize: 18,
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => Age()),
-                (route) => false,
-              );
+              Navigator.pop(context);
             },
           ),
           title: Text(
@@ -154,6 +146,7 @@ class _WeightState extends State<Weight> {
                     onSelectedItemChanged: (index) {
                       setState(() {
                         selectedWeight = index;
+                        widget.userData.weight = selectedWeight + 1;
                       });
                     },
                     physics: const FixedExtentScrollPhysics(),
@@ -189,18 +182,18 @@ class _WeightState extends State<Weight> {
               Spacer(),
               ElevatedButton(
                 onPressed: () async {
-                  await _saveWeightToFirestore((selectedWeight + 1).toString());
-                  Navigator.pushAndRemoveUntil(
+                  await _saveWeightToFirestore(selectedWeight + 1);
+                  Navigator.push(
                     context,
-                    MaterialPageRoute(builder: (context) => HeightSelector()),
-                    (route) => false,
+                    MaterialPageRoute(
+                      builder: (context) => HeightSelector(userData: widget.userData),
+                    ),
                   );
                 },
                 style: ElevatedButton.styleFrom(
                   foregroundColor: Colors.black,
                   backgroundColor: Colors.white,
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                  padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                 ),
                 child: Text(
                   'Continue',

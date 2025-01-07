@@ -1,11 +1,14 @@
 import 'package:fitopia/page/genderSelection.dart';
 import 'package:fitopia/page/login.dart';
+import 'package:fitopia/userRegistrationData.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts; // Use a prefix for google_fonts
 
 
 class GetStarted extends StatelessWidget {
-  const GetStarted({super.key});
+  final UserRegistrationData userData = UserRegistrationData();
+
+  GetStarted({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -76,11 +79,12 @@ class GetStarted extends StatelessWidget {
                 ),
                 GestureDetector(
                   onTap: () {
-                    Navigator.pushAndRemoveUntil(
-                      context,
-                      MaterialPageRoute(builder: (context) => const GenderSelectionScreen()),
-                      (route) => false,
-                    );
+                    Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => GenderSelectionScreen(userData: userData),
+                    ),
+                  );
                   },
                   child: Container(
                     width: 180,

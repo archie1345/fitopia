@@ -1,12 +1,13 @@
-import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/page/age.dart';
 import 'package:fitopia/page/getStarted.dart';
+import 'package:fitopia/userRegistrationData.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
 
 class GenderSelectionScreen extends StatefulWidget {
-  const GenderSelectionScreen({super.key});
+  final UserRegistrationData userData;
+
+  const GenderSelectionScreen({super.key, required this.userData});
 
   @override
   _GenderSelectionScreenState createState() => _GenderSelectionScreenState();
@@ -15,24 +16,6 @@ class GenderSelectionScreen extends StatefulWidget {
 class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
   bool _isMaleSelected = false;
   bool _isFemaleSelected = false;
-  final FirebaseAuth _auth = FirebaseAuth.instance;
-  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-
-  Future<void> _saveGenderToFirestore(String gender) async {
-    try {
-      final User? user = _auth.currentUser;
-      if (user != null) {
-        await _firestore.collection('users').doc(user.uid).update({
-          'gender': gender,
-        });
-        print("Gender updated successfully.");
-      } else {
-        print("No user logged in.");
-      }
-    } catch (e) {
-      print("Error updating gender: $e");
-    }
-  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,9 +35,10 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
               Navigator.pushAndRemoveUntil(
-                  context,
-                  MaterialPageRoute(builder: (context) => GetStarted()),
-                  (route) => false);
+                context,
+                MaterialPageRoute(builder: (context) => GetStarted()),
+                (route) => false,
+              );
             },
           ),
           title: Text(
@@ -97,12 +81,13 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                     fontSize: 16,
                   ),
                 ),
-                const SizedBox(height: 40),
+                const SizedBox(height: 20),
                 GestureDetector(
                   onTap: () {
                     setState(() {
                       _isMaleSelected = true;
                       _isFemaleSelected = false;
+                      widget.userData.gender = 'Male';
                     });
                   },
                   child: Container(
@@ -143,6 +128,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                     setState(() {
                       _isFemaleSelected = true;
                       _isMaleSelected = false;
+                      widget.userData.gender = 'Female';
                     });
                   },
                   child: Container(
@@ -179,20 +165,18 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 ),
                 const Spacer(),
                 ElevatedButton(
-                  onPressed: () async {
-                    String selectedGender = _isMaleSelected ? 'Male' : 'Female';
-                    await _saveGenderToFirestore(selectedGender);
-                    Navigator.pushAndRemoveUntil(
+                  onPressed: () {
+                    Navigator.push(
                       context,
-                      MaterialPageRoute(builder: (context) => Age()),
-                      (route) => false,
+                      MaterialPageRoute(
+                        builder: (context) => Age(userData: widget.userData),
+                      ),
                     );
                   },
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(
-                        horizontal: 50, vertical: 15),
+                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
                   ),
                   child: Text(
                     'Continue',

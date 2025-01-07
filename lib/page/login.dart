@@ -212,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                                builder: (context) => const GetStarted()),
+                                builder: (context) =>  GetStarted()),
                             (route) => false,
                           );
                         },

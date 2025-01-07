@@ -1,2 +1,0 @@
-String publish_key = "pk_test_51Qcc97R3km1Wsl68keogSvTUekALbQcaXXjY8QVC75dhNHJCuvMSqWQLoNZGBi8jlDELII3oxc1sPu6nqsvUhhGT008qoGjA7b";
-String secret_key = "sk_test_51Qcc97R3km1Wsl68nuutBNkGFcbz0UYOeKUJJfIn808o2KkDP6hnU337P0pmtTV6FXZTTBdbHoMBI45qC7Ztr7m000xhYtE7Ls";

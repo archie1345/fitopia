@@ -1,5 +1,4 @@
 import 'package:firebase_core/firebase_core.dart';
-import 'package:fitopia/keys.dart';
 import 'package:fitopia/page/getStarted.dart';
 import 'package:fitopia/page/recipe.dart';
 import 'package:flutter/foundation.dart';
@@ -42,7 +41,7 @@ class MyApp extends StatelessWidget {
               child: LoginPage(),
             ),
         '/login': (context) => const LoginPage(),
-        '/signUp': (context) => const GetStarted(),
+        '/signUp': (context) => GetStarted(),
         '/home': (context) => const HomePage(),
         '/recipe': (context) => const RecipeListPage(),
       },

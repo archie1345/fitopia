@@ -2,7 +2,6 @@ import 'package:fitopia/page/height.dart';
 import 'package:fitopia/page/login.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-// import 'dart:io';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/firebase_auth_implementation/firebase_auth_services.dart';
@@ -26,22 +25,11 @@ class _FillProfileState extends State<FillProfile> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  // File? _image;
   final picker = ImagePicker();
 
   final FirebaseAuthService _auth = FirebaseAuthService();
 
   bool isSigningUp = false;
-
-  // Future<void> _pickImage() async {
-  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
-
-  //   if (pickedFile != null) {
-  //     setState(() {
-  //       _image = File(pickedFile.path);
-  //     });
-  //   }
-  // }
 
   @override
   void dispose() {
@@ -119,30 +107,10 @@ class _FillProfileState extends State<FillProfile> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  // GestureDetector(
-                  //   onTap: _pickImage,
-                  //   child: CircleAvatar(
-                  //     radius: 60,
-                  //     backgroundImage: _image == null
-                  //         ? const NetworkImage(
-                  //             'https://via.placeholder.com/125')
-                  //         : FileImage(_image!) as ImageProvider,
-                  //     child: _image == null
-                  //         ? const Icon(
-                  //             Icons.camera_alt,
-                  //             size: 40,
-                  //             color: Colors.grey,
-                  //           )
-                  //         : null,
-                  //   ),
-                  // ),
-                  const SizedBox(height: 20),
                   _buildInputField('Username', usernameController,
                       hintText: 'Enter username'),
                   _buildInputField('Email', emailController,
                       isEmail: true, hintText: 'Enter email'),
-                  // _buildInputField('Mobile Number', mobileController,
-                  //     hintText: 'Enter mobile number'),
                   _buildInputField('Password', passwordController,
                       isPassword: true, hintText: 'Enter password'),
                   _buildInputField(
@@ -207,7 +175,7 @@ class _FillProfileState extends State<FillProfile> {
     );
   }
 
-  void _register() async {
+void _register() async {
   setState(() {
     isSigningUp = true;
   });
@@ -218,8 +186,32 @@ class _FillProfileState extends State<FillProfile> {
   String password = passwordController.text;
   String confirmPassword = confirmPasswordController.text;
 
+  // Validate fields
+  if (username.isEmpty || email.isEmpty || password.isEmpty) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Please fill all fields.')),
+    );
+    print("Validation failed: One or more fields are empty.");
+    setState(() {
+      isSigningUp = false;
+    });
+    return;
+  }
+
+  // Validate email format
+  if (!validateField(email, 'email')) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Enter a valid email address.')),
+    );
+    print("Validation failed: Invalid email format.");
+    setState(() {
+      isSigningUp = false;
+    });
+    return;
+  }
+
   // Validate password constraints
-  if (!validatePassword(password)) {
+  if (!validateField(password, 'password')) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text(
@@ -227,46 +219,53 @@ class _FillProfileState extends State<FillProfile> {
         ),
       ),
     );
+    print("Validation failed: Password does not meet requirements.");
     setState(() {
       isSigningUp = false;
     });
     return;
   }
 
+  // Check if passwords match
   if (password != confirmPassword) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(content: Text('Passwords do not match!')),
     );
+    print("Validation failed: Passwords do not match.");
     setState(() {
       isSigningUp = false;
     });
     return;
   }
 
-  User? user =
-      await _auth.signUpWithEmailAndPassword(email, password, username);
+  try {
+    // Attempt Firebase registration
+    User? user = await _auth.signUpWithEmailAndPassword(email, password, username);
 
-  if (user != null) {
-    // Add user data to Firestore
-    try {
-      await FirebaseFirestore.instance
-          .collection('users') // Firestore collection
-          .doc(user.uid) // Use UID as the document ID
-          .set({
-        'username': username,
-        'email': email,
-        'mobileNumber': mobileNumber,
-        'photoURL': user.photoURL ?? '', // Handle optional photo URL
-        'createdAt': FieldValue.serverTimestamp(), // Add timestamp
-      });
+    if (user != null) {
+      print("User registered successfully: ${user.uid}");
+      try {
+        // Add user data to Firestore
+        await FirebaseFirestore.instance.collection('users').doc(user.uid).set({
+          'username': username,
+          'email': email,
+          'mobileNumber': mobileNumber,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
 
-      showToast(message: "User is successfully created");
-      Navigator.pushNamed(context, "/home");
-    } catch (e) {
-      showToast(message: "Error storing user data: $e");
+        showToast(message: "User is successfully created");
+        Navigator.pushNamed(context, "/home");
+      } catch (e) {
+        print("Error storing user data in Firestore: $e");
+        showToast(message: "Error storing user data: $e");
+      }
+    } else {
+      print("Registration failed: User is null.");
+      showToast(message: "Some error happened during registration.");
     }
-  } else {
-    showToast(message: "Some error happened");
+  } catch (e) {
+    print("Error during Firebase registration: $e");
+    showToast(message: "Registration failed: $e");
   }
 
   setState(() {
@@ -274,13 +273,19 @@ class _FillProfileState extends State<FillProfile> {
   });
 }
 
-// Helper function to validate password
-bool validatePassword(String password) {
-  final passwordRegEx =
-      r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$';
-  return RegExp(passwordRegEx).hasMatch(password);
-}
 
+  // Helper function to validate fields
+  bool validateField(String value, String type) {
+    if (type == 'email') {
+      final emailRegEx = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+      return RegExp(emailRegEx).hasMatch(value);
+    } else if (type == 'password') {
+      final passwordRegEx =
+          r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,}$';
+      return RegExp(passwordRegEx).hasMatch(value);
+    }
+    return value.isNotEmpty;
+  }
 
   // Helper to create input fields
   Widget _buildInputField(String label, TextEditingController controller,
@@ -303,7 +308,7 @@ bool validatePassword(String password) {
             controller: controller,
             obscureText: isPassword,
             keyboardType:
-                isEmail ? TextInputType.emailAddress : TextInputType.text,
+                !isEmail ? TextInputType.text : TextInputType.emailAddress,
             decoration: InputDecoration(
               hintText: hintText,
               border: OutlineInputBorder(

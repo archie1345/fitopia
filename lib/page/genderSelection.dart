@@ -1,6 +1,6 @@
 import 'package:fitopia/page/age.dart';
 import 'package:fitopia/page/getStarted.dart';
-import 'package:fitopia/userRegistrationData.dart';
+import 'package:fitopia/classes/userRegistrationData.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
 

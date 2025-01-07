@@ -1,7 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/page/register.dart';
-import 'package:fitopia/userRegistrationData.dart';
+import 'package:fitopia/classes/userRegistrationData.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
 import 'package:shared_preferences/shared_preferences.dart';

@@ -1,6 +1,6 @@
 import 'package:fitopia/page/genderSelection.dart';
 import 'package:fitopia/page/login.dart';
-import 'package:fitopia/userRegistrationData.dart';
+import 'package:fitopia/classes/userRegistrationData.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts; // Use a prefix for google_fonts
 

@@ -1,6 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'package:fitopia/toast.dart';
+import 'package:fitopia/widget/toast.dart';
 import 'package:flutter/material.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
@@ -88,39 +88,41 @@ class FirebaseAuthService {
   }
 
   /// Sign in using Google credentials.
-  Future<void> signInWithGoogle(BuildContext context) async {
-    final GoogleSignIn googleSignIn = GoogleSignIn();
-    try {
-      final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+Future<void> signInWithGoogle(BuildContext context) async {
+  final GoogleSignIn googleSignIn = GoogleSignIn();
+  try {
+    final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
 
-      if (googleSignInAccount != null) {
-        final GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
+    if (googleSignInAccount != null) {
+      final GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
 
-        final AuthCredential credential = GoogleAuthProvider.credential(
-          idToken: googleAuth.idToken,
-          accessToken: googleAuth.accessToken,
-        );
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        idToken: googleAuth.idToken,
+        accessToken: googleAuth.accessToken,
+      );
 
-        UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
+      UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
 
-        // Save user information to Firestore if new
-        if (userCredential.additionalUserInfo?.isNewUser == true) {
-          final user = userCredential.user;
-          await _firestore.collection('users').doc(user!.uid).set({
-            'username': user.displayName ?? '',
-            'email': user.email ?? '',
-            'uid': user.uid,
-            'createdAt': Timestamp.now(),
-          });
-        }
+      final user = userCredential.user;
 
-        Navigator.pushNamed(context, "/home");
+      if (user != null) {
+        // Always merge or set data in Firestore to ensure email is saved
+        await _firestore.collection('users').doc(user.uid).set({
+          'username': user.displayName ?? '',
+          'email': user.email ?? 'N/A', // Ensure email is saved
+          'uid': user.uid,
+          'createdAt': FieldValue.serverTimestamp(),
+        }, SetOptions(merge: true)); // Merge data if the document exists
       }
-    } catch (e) {
-      print('Google Sign-In Error: $e');
-      showToast(message: "An error occurred during Google Sign-In.");
+
+      Navigator.pushNamed(context, "/home");
     }
+  } catch (e) {
+    print('Google Sign-In Error: $e');
+    showToast(message: "An error occurred during Google Sign-In.");
   }
+}
+
 
   /// Sign out the current user.
   Future<void> signOut() async {

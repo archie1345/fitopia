@@ -4,7 +4,7 @@ import 'package:fitopia/page/home.dart';
 import 'package:flutter/material.dart';
 import 'package:fitopia/page/getStarted.dart';
 import 'package:fitopia/widget/form_container_widget.dart';
-import 'package:fitopia/toast.dart';
+import 'package:fitopia/widget/toast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
 import '../../firebase_auth_implementation/firebase_auth_services.dart';

@@ -26,11 +26,32 @@ class HomePage extends StatelessWidget {
     }
   }
 
-  // Function to check the subscription status
+  Future<String> _getUsername() async {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user != null) {
+      try {
+        DocumentSnapshot userDoc = await FirebaseFirestore.instance
+            .collection('users')
+            .doc(user.uid)
+            .get();
+
+        if (userDoc.exists) {
+          Map<String, dynamic>? data = userDoc.data() as Map<String, dynamic>?;
+          return data?['username'] ?? (user.displayName ?? 'User');
+        } else {
+          // Fallback to Google display name if no document exists
+          return user.displayName ?? 'User';
+        }
+      } catch (e) {
+        print('Error fetching username: $e');
+      }
+    }
+    return 'User';
+  }
+
   Future<void> _checkSubscriptionStatus(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      // If no user is logged in, navigate to the PremiumPage
       Navigator.pushNamed(context, "/PremiumPage");
       return;
     }
@@ -46,53 +67,65 @@ class HomePage extends StatelessWidget {
             subscriptionSnapshot.data() as Map<String, dynamic>;
 
         if (data['status'] != 'paid') {
-          // If subscription is not active, redirect to PremiumPage
           Navigator.pushNamed(context, "/PremiumPage");
         }
       } else {
-        // If subscription data is not found, redirect to PremiumPage
         Navigator.pushNamed(context, "/PremiumPage");
       }
     } catch (e) {
-      // Handle error
       print("Error checking subscription status: $e");
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    final user = FirebaseAuth.instance.currentUser;
-
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
-        padding: const EdgeInsets.symmetric(
-            vertical: 32), // Space for the navigation bar
+        padding: const EdgeInsets.symmetric(vertical: 32),
         child: SingleChildScrollView(
           child: Column(
             children: [
-              // User Greeting Section
               Container(
                 padding: const EdgeInsets.all(16.0),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Hi, ${user?.displayName ?? "User"}',
-                          style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.bold,
-                            color: const Color.fromRGBO(81, 75, 35, 1),
-                          ),
-                        ),
-                        const Text(
-                          "It's time to challenge your limits.",
-                          style: TextStyle(fontSize: 16, color: Colors.black87),
-                        ),
-                      ],
+                    FutureBuilder<String>(
+                      future: _getUsername(),
+                      builder: (context, snapshot) {
+                        if (snapshot.connectionState == ConnectionState.waiting) {
+                          return const CircularProgressIndicator();
+                        } else if (snapshot.hasError) {
+                          return Text(
+                            'Hi, User',
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromRGBO(81, 75, 35, 1),
+                            ),
+                          );
+                        } else {
+                          return Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Hi, ${snapshot.data}',
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Color.fromRGBO(81, 75, 35, 1),
+                                ),
+                              ),
+                              const Text(
+                                "It's time to challenge your limits.",
+                                style:
+                                    TextStyle(fontSize: 16, color: Colors.black87),
+                              ),
+                            ],
+                          );
+                        }
+                      },
                     ),
                     IconButton(
                       icon: const Icon(Icons.account_circle,
@@ -108,7 +141,6 @@ class HomePage extends StatelessWidget {
                   ],
                 ),
               ),
-              // Navigation Options
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -146,7 +178,6 @@ class HomePage extends StatelessWidget {
                   ),
                 ],
               ),
-              // Workout Section
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: const Text(
@@ -160,7 +191,6 @@ class HomePage extends StatelessWidget {
                   scrollDirection: Axis.horizontal,
                   child: Row(
                     children: [
-                      // Upper Body Workout - Check subscription status before navigating
                       WorkoutCard(
                         title: 'Upper Body',
                         imageUrl:
@@ -177,7 +207,6 @@ class HomePage extends StatelessWidget {
                           }
                         },
                       ),
-                      // Core Workout - Check subscription status before navigating
                       WorkoutCard(
                         title: 'Core',
                         imageUrl: 'https://example.com',
@@ -193,7 +222,6 @@ class HomePage extends StatelessWidget {
                           }
                         },
                       ),
-                      // Lower Body Workout - Check subscription status before navigating
                       WorkoutCard(
                         title: 'Lower Body',
                         imageUrl: 'https://example.com',
@@ -213,15 +241,12 @@ class HomePage extends StatelessWidget {
                   ),
                 ),
               ),
-              // Weekly Challenge Section
               WeeklyChallenge(
                 title: 'Weekly Challenge',
                 description: 'Plank With Hip Twist',
-                imageUrl:
-                    'https://example.com/challenge', // Replace with a valid URL
+                imageUrl: 'https://example.com/challenge',
                 onTap: () => _launchURL('https://example.com/challenge'),
               ),
-              // Articles & Tips Section
               Padding(
                 padding: const EdgeInsets.all(8.0),
                 child: const Text(

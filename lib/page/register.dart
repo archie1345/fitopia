@@ -2,7 +2,7 @@ import 'package:fitopia/page/height.dart';
 import 'package:fitopia/page/login.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
-import 'dart:io';
+// import 'dart:io';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:fitopia/firebase_auth_implementation/firebase_auth_services.dart';
@@ -26,22 +26,22 @@ class _FillProfileState extends State<FillProfile> {
   final TextEditingController confirmPasswordController =
       TextEditingController();
 
-  File? _image;
+  // File? _image;
   final picker = ImagePicker();
 
   final FirebaseAuthService _auth = FirebaseAuthService();
 
   bool isSigningUp = false;
 
-  Future<void> _pickImage() async {
-    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+  // Future<void> _pickImage() async {
+  //   final pickedFile = await picker.pickImage(source: ImageSource.gallery);
 
-    if (pickedFile != null) {
-      setState(() {
-        _image = File(pickedFile.path);
-      });
-    }
-  }
+  //   if (pickedFile != null) {
+  //     setState(() {
+  //       _image = File(pickedFile.path);
+  //     });
+  //   }
+  // }
 
   @override
   void dispose() {
@@ -208,56 +208,79 @@ class _FillProfileState extends State<FillProfile> {
   }
 
   void _register() async {
-    setState(() {
-      isSigningUp = true;
-    });
+  setState(() {
+    isSigningUp = true;
+  });
 
-    String username = usernameController.text;
-    String email = emailController.text;
-    String mobileNumber = mobileController.text;
-    String password = passwordController.text;
-    String confirmPassword = confirmPasswordController.text;
+  String username = usernameController.text.trim();
+  String email = emailController.text.trim();
+  String mobileNumber = mobileController.text.trim();
+  String password = passwordController.text;
+  String confirmPassword = confirmPasswordController.text;
 
-    if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Passwords do not match!')),
-      );
-      setState(() {
-        isSigningUp = false;
-      });
-      return;
-    }
-
-    User? user =
-        await _auth.signUpWithEmailAndPassword(email, password, username);
-
-    if (user != null) {
-      // Add user data to Firestore
-      try {
-        await FirebaseFirestore.instance
-            .collection('users') // Firestore collection
-            .doc(user.uid) // Use UID as the document ID
-            .set({
-          'username': username,
-          'email': email,
-          'mobileNumber': mobileNumber,
-          'photoURL': user.photoURL ?? '', // Handle optional photo URL
-          'createdAt': FieldValue.serverTimestamp(), // Add timestamp
-        });
-
-        showToast(message: "User is successfully created");
-        Navigator.pushNamed(context, "/home");
-      } catch (e) {
-        showToast(message: "Error storing user data: $e");
-      }
-    } else {
-      showToast(message: "Some error happened");
-    }
-
+  // Validate password constraints
+  if (!validatePassword(password)) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(
+        content: Text(
+          'Password must be at least 8 characters long and include an uppercase letter, a number, and a special character.',
+        ),
+      ),
+    );
     setState(() {
       isSigningUp = false;
     });
+    return;
   }
+
+  if (password != confirmPassword) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      const SnackBar(content: Text('Passwords do not match!')),
+    );
+    setState(() {
+      isSigningUp = false;
+    });
+    return;
+  }
+
+  User? user =
+      await _auth.signUpWithEmailAndPassword(email, password, username);
+
+  if (user != null) {
+    // Add user data to Firestore
+    try {
+      await FirebaseFirestore.instance
+          .collection('users') // Firestore collection
+          .doc(user.uid) // Use UID as the document ID
+          .set({
+        'username': username,
+        'email': email,
+        'mobileNumber': mobileNumber,
+        'photoURL': user.photoURL ?? '', // Handle optional photo URL
+        'createdAt': FieldValue.serverTimestamp(), // Add timestamp
+      });
+
+      showToast(message: "User is successfully created");
+      Navigator.pushNamed(context, "/home");
+    } catch (e) {
+      showToast(message: "Error storing user data: $e");
+    }
+  } else {
+    showToast(message: "Some error happened");
+  }
+
+  setState(() {
+    isSigningUp = false;
+  });
+}
+
+// Helper function to validate password
+bool validatePassword(String password) {
+  final passwordRegEx =
+      r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$';
+  return RegExp(passwordRegEx).hasMatch(password);
+}
+
 
   // Helper to create input fields
   Widget _buildInputField(String label, TextEditingController controller,

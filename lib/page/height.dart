@@ -64,6 +64,7 @@ class _HeightSelectorState extends State<HeightSelector> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           surfaceTintColor: Colors.white,
           leading: IconButton(

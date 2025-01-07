@@ -36,12 +36,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       title: 'Fitopia',
       routes: {
-        '/': (context) => const SplashScreen(
-              // Here, you can decide whether to show the LoginPage or HomePage based on user authentication
-              child: LoginPage(),
-            ),
+        '/': (context) => const SplashScreen(),
         '/login': (context) => const LoginPage(),
-        '/signUp': (context) => GetStarted(),
+        '/getStarted': (context) => GetStarted(),
         '/home': (context) => const HomePage(),
         '/recipe': (context) => const RecipeListPage(),
       },

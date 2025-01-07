@@ -177,7 +177,7 @@ class _UpperBodyState extends State<UpperBody> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.white,
             elevation: 0,
           ),
       

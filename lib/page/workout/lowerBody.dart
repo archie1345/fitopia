@@ -177,7 +177,7 @@ class _LowerBodyState extends State<LowerBody> {
                 fontWeight: FontWeight.w600,
               ),
             ),
-            backgroundColor: Colors.transparent,
+            backgroundColor: Colors.white,
             elevation: 0,
           ),
       

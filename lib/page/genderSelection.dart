@@ -1,5 +1,4 @@
 import 'package:fitopia/page/age.dart';
-import 'package:fitopia/page/getStarted.dart';
 import 'package:fitopia/classes/userRegistrationData.dart';
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
@@ -21,24 +20,17 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pushAndRemoveUntil(
-          context,
-          MaterialPageRoute(builder: (context) => GetStarted()),
-          (route) => false,
-        );
+        Navigator.pop(context);
         return false;
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           leading: IconButton(
             iconSize: 18,
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => GetStarted()),
-                (route) => false,
-              );
+              Navigator.pop(context);
             },
           ),
           title: Text(
@@ -50,7 +42,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
               fontWeight: FontWeight.w600,
             ),
           ),
-          backgroundColor: Colors.transparent,
+          backgroundColor: Colors.white,
           elevation: 0,
         ),
         body: Center(

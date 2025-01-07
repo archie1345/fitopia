@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_fonts/google_fonts.dart' as gfonts;
 
 class ForgotPassword extends StatelessWidget {
   const ForgotPassword({super.key});
@@ -39,10 +40,33 @@ class ForgotPassword extends StatelessWidget {
 
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context);
+        Navigator.pop(context, '/login');
         return false;
       },
       child: Scaffold(
+        appBar: AppBar(
+            surfaceTintColor: Colors.white,
+            leading: IconButton(
+              iconSize: 18,
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () {
+              Navigator.pushNamed(context, '/login');
+            },
+
+            ),
+            title: Text(
+              'Back',
+              style: gfonts.GoogleFonts.getFont(
+                'League Spartan',
+                color: const Color(0xFF656839),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 0,
+          ),
+
         body: SingleChildScrollView(
           child: Container(
             width: double.infinity,
@@ -52,16 +76,6 @@ class ForgotPassword extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                Text(
-                  'FORGOT PASSWORD',
-                  style: TextStyle(
-                    color: Color(0xFF514B23),
-                    fontSize: 17,
-                    fontFamily: 'Montserrat',
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 7,
-                  ),
-                ),
                 SizedBox(height: 60),
                 Text(
                   'Forgot Password?',

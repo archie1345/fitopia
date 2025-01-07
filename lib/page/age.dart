@@ -16,7 +16,7 @@ class Age extends StatefulWidget {
 class _AgeState extends State<Age> {
   final FixedExtentScrollController _controller = FixedExtentScrollController(initialItem: 28);
 
-  int selectedAge = 28;
+  int selectedAge = 29;
 
   @override
   Widget build(BuildContext context) {
@@ -30,30 +30,29 @@ class _AgeState extends State<Age> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
-          leading: IconButton(
-            iconSize: 18,
-            icon: const Icon(Icons.arrow_back_ios),
-            onPressed: () {
-              Navigator.pushAndRemoveUntil(
-                context,
-                MaterialPageRoute(builder: (context) => GenderSelectionScreen(userData: widget.userData)),
-                (route) => false,
-              );
+            surfaceTintColor: Colors.white,
+            leading: IconButton(
+              iconSize: 18,
+              icon: const Icon(Icons.arrow_back_ios),
+              onPressed: () {
+              Navigator.pop(context);
             },
-          ),
-          title: Text(
-            'Back',
-            style: gfonts.GoogleFonts.getFont(
-              'League Spartan',
-              color: const Color(0xFF656839),
-              fontSize: 18,
-              fontWeight: FontWeight.w600,
+
             ),
+            title: Text(
+              'Back',
+              style: gfonts.GoogleFonts.getFont(
+                'League Spartan',
+                color: const Color(0xFF656839),
+                fontSize: 18,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+            backgroundColor: Colors.white,
+            elevation: 0,
           ),
-          backgroundColor: Colors.transparent,
-          elevation: 0,
-        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 54),

@@ -45,6 +45,7 @@ class _WeightState extends State<Weight> {
         return false;
       },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           surfaceTintColor: Colors.white,
           leading: IconButton(

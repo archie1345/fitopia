@@ -38,18 +38,19 @@ class _FillProfileState extends State<FillProfile> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-        Navigator.pop(context);
-        return false;
-      },
+      Navigator.pushNamedAndRemoveUntil(context, "/getStarted", (route) => false);
+      return false;
+    },
       child: Scaffold(
+        backgroundColor: Colors.white,
         appBar: AppBar(
           surfaceTintColor: Colors.white,
           leading: IconButton(
             iconSize: 18,
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
-              Navigator.pop(context);
-            },
+            Navigator.pushNamedAndRemoveUntil(context, "/getStarted", (route) => false);
+          },
           ),
           title: Text(
             'Back',

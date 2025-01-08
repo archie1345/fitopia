@@ -52,7 +52,12 @@ class HomePage extends StatelessWidget {
   Future<void> _checkSubscriptionStatus(BuildContext context) async {
     final user = FirebaseAuth.instance.currentUser;
     if (user == null) {
-      Navigator.pushNamed(context, "/PremiumPage");
+      Navigator.push(
+        context,
+        MaterialPageRoute(
+          builder: (context) => PremiumPage(userId: ''),
+        ),
+      );
       return;
     }
 
@@ -67,10 +72,20 @@ class HomePage extends StatelessWidget {
             subscriptionSnapshot.data() as Map<String, dynamic>;
 
         if (data['status'] != 'paid') {
-          Navigator.pushNamed(context, "/PremiumPage");
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => PremiumPage(userId: user.uid),
+            ),
+          );
         }
       } else {
-        Navigator.pushNamed(context, "/PremiumPage");
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => PremiumPage(userId: user.uid),
+          ),
+        );
       }
     } catch (e) {
       print("Error checking subscription status: $e");
@@ -79,6 +94,8 @@ class HomePage extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = FirebaseAuth.instance.currentUser;
+
     return Scaffold(
       backgroundColor: Colors.white,
       body: Padding(
@@ -161,13 +178,16 @@ class HomePage extends StatelessWidget {
                   ),
                   InkWell(
                     onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                            builder: (context) => const PremiumPage(
-                                  userId: '',
-                                )),
-                      );
+                      if (user != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => PremiumPage(userId: user.uid),
+                          ),
+                        );
+                      } else {
+                        Navigator.pushNamed(context, '/login');
+                      }
                     },
                     child: Column(
                       children: const [
@@ -198,7 +218,7 @@ class HomePage extends StatelessWidget {
                         duration: '1-2 mins',
                         onTap: () async {
                           await _checkSubscriptionStatus(context);
-                          if (FirebaseAuth.instance.currentUser != null) {
+                          if (user != null) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -213,7 +233,7 @@ class HomePage extends StatelessWidget {
                         duration: '1-2 mins',
                         onTap: () async {
                           await _checkSubscriptionStatus(context);
-                          if (FirebaseAuth.instance.currentUser != null) {
+                          if (user != null) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(
@@ -228,7 +248,7 @@ class HomePage extends StatelessWidget {
                         duration: '1-2 mins',
                         onTap: () async {
                           await _checkSubscriptionStatus(context);
-                          if (FirebaseAuth.instance.currentUser != null) {
+                          if (user != null) {
                             Navigator.push(
                               context,
                               MaterialPageRoute(

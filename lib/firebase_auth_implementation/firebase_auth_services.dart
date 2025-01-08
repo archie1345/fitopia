@@ -1,3 +1,5 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:fitopia/widget/toast.dart';
@@ -8,17 +10,40 @@ class FirebaseAuthService {
   final FirebaseAuth _firebaseAuth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
-  /// Sign up a new user using email and password, and set their displayName.
-  Future<User?> signUpWithEmailAndPassword(String email, String password, String username) async {
+   // Create a new Stripe customer and save the ID to Firestore
+  Future<void> createStripeCustomer(String userId, String email) async {
     try {
-      // Create a new user with email and password
-      UserCredential credential = await _firebaseAuth.createUserWithEmailAndPassword(
+      final response = await http.post(
+        Uri.parse('https://us-central1-fitopia-42331.cloudfunctions.net/api/create-customer'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({'email': email, 'userId': userId}),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to create Stripe customer: ${response.body}');
+      }
+
+      final data = json.decode(response.body);
+      await _firestore
+          .collection('users')
+          .doc(userId)
+          .update({'stripeCustomerId': data['customerId']});
+    } catch (e) {
+      print('Error creating Stripe customer: $e');
+      throw Exception('Failed to create Stripe customer.');
+    }
+  }
+
+// Sign up a new user
+  Future<User?> signUpWithEmailAndPassword(
+      String email, String password, String username) async {
+    try {
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
         email: email,
         password: password,
       );
 
-      User? user = credential.user;
-
+      final user = credential.user;
       if (user == null) {
         throw FirebaseAuthException(
           code: 'user-creation-failed',
@@ -26,41 +51,42 @@ class FirebaseAuthService {
         );
       }
 
-      // Update displayName for the user
-      await user.updateDisplayName(username);
-      await user.reload();
-      user = _firebaseAuth.currentUser;
-
-      // Save user information to Firestore
-      await _firestore.collection('users').doc(user!.uid).set({
-        'username': username,
+      // Save user to Firestore
+      await _firestore.collection('users').doc(user.uid).set({
         'email': email,
+        'username': username,
         'uid': user.uid,
         'createdAt': Timestamp.now(),
       });
 
+      // Create a Stripe Customer
+      await createStripeCustomer(user.uid, email);
+
       return user;
-    } on FirebaseAuthException catch (e) {
-      switch (e.code) {
-        case 'email-already-in-use':
-          showToast(message: 'The email address is already in use.');
-          break;
-        case 'weak-password':
-          showToast(message: 'The password is too weak.');
-          break;
-        case 'invalid-email':
-          showToast(message: 'Invalid email address.');
-          break;
-        default:
-          showToast(message: 'FirebaseAuth error: ${e.message}');
-      }
-      print('FirebaseAuthException: ${e.code}, ${e.message}');
     } catch (e) {
-      print('Unexpected error: $e');
-      showToast(message: 'An unexpected error occurred.');
+      print('Error during signup: $e');
+      rethrow;
     }
-    return null;
   }
+
+  // Handle FirebaseAuth exceptions
+  void handleAuthException(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'email-already-in-use':
+        showToast(message: 'The email address is already in use.');
+        break;
+      case 'weak-password':
+        showToast(message: 'The password is too weak.');
+        break;
+      case 'invalid-email':
+        showToast(message: 'Invalid email address.');
+        break;
+      default:
+        showToast(message: 'FirebaseAuth error: ${e.message}');
+    }
+    print('FirebaseAuthException: ${e.code}, ${e.message}');
+  }
+
 
   /// Sign in an existing user with email and password.
   Future<User?> signInWithEmailAndPassword(String email, String password) async {

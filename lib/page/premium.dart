@@ -1,6 +1,8 @@
-import 'package:fitopia/page/home.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
+import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 class PremiumPage extends StatefulWidget {
   final String userId; // User ID from Firebase Authentication
@@ -13,7 +15,16 @@ class PremiumPage extends StatefulWidget {
 
 class _PremiumPageState extends State<PremiumPage> {
   bool isPaid = false;
-  bool isLoading = false; // For showing a loading spinner during payment
+  bool isLoading = false;
+
+  // Flag to determine environment (local or production)
+  static const bool isLocal = false; // Set to true for local, false for production
+  static const String localApiUrl = 'http://127.0.0.1:5001/fitopia-42331/us-central1/api';
+  static const String productionApiUrl = 'https://us-central1-fitopia-42331.cloudfunctions.net/api';
+
+  String getApiUrl() {
+    return isLocal ? localApiUrl : productionApiUrl;
+  }
 
   @override
   void initState() {
@@ -21,72 +32,152 @@ class _PremiumPageState extends State<PremiumPage> {
     checkSubscriptionStatus(); // Check subscription status on page load
   }
 
-  // Function to check if the user already has a premium subscription
-  Future<void> checkSubscriptionStatus() async {
+  Future<void> createCustomerIfNeeded() async {
     try {
-      DocumentSnapshot userDoc = await FirebaseFirestore.instance
-          .collection('users')
+      // Check if the user exists in Firestore
+      DocumentSnapshot customerDoc = await FirebaseFirestore.instance
+          .collection('customers')
           .doc(widget.userId)
           .get();
 
-      if (userDoc.exists && userDoc['isPremium'] == true) {
-        setState(() {
-          isPaid = true;
-        });
+      // If the user doesn't have a Stripe ID, create a new customer
+      if (!customerDoc.exists || customerDoc['stripeId'] == null) {
+        final response = await http.post(
+          Uri.parse('${getApiUrl()}/create-customer'),
+          headers: {'Content-Type': 'application/json'},
+          body: json.encode({
+            'email': 'test@example.com', // Replace with the user's actual email
+            'userId': widget.userId,
+          }),
+        );
 
-        // Redirect to the homepage if already subscribed
-        WidgetsBinding.instance.addPostFrameCallback((_) {
-          Navigator.pushReplacement(
-            context,
-            MaterialPageRoute(builder: (context) => const HomePage()),
-          );
-        });
+        if (response.statusCode != 200) {
+          throw Exception('Failed to create customer: ${response.body}');
+        }
+
+        final data = json.decode(response.body);
+
+        // Update Firestore with the new Stripe customer ID
+        await FirebaseFirestore.instance
+            .collection('customers')
+            .doc(widget.userId)
+            .set({
+          'stripeId': data['customer']['id'],
+        }, SetOptions(merge: true));
+
+        print('Customer created successfully: ${data['customer']['id']}');
+      } else {
+        print('Customer already exists: ${customerDoc['stripeId']}');
       }
     } catch (e) {
-      print("Error checking subscription status: $e");
+      print('Error creating customer: $e');
+      throw Exception('Error creating customer: $e');
     }
   }
 
-  // Simulates a dummy payment process and updates Firestore
-  Future<void> processDummyPayment() async {
+  Future<void> checkSubscriptionStatus() async {
+    try {
+      if (widget.userId.isEmpty) {
+        throw Exception("User ID is missing.");
+      }
+
+      DocumentSnapshot customerDoc = await FirebaseFirestore.instance
+          .collection('customers')
+          .doc(widget.userId)
+          .get();
+
+      if (customerDoc.exists && customerDoc['isPremium'] == true) {
+        setState(() {
+          isPaid = true;
+        });
+        Navigator.pushReplacementNamed(context, '/home');
+      }
+    } catch (e) {
+      print('Error checking subscription status: $e');
+    }
+  }
+
+  Future<void> processSubscription() async {
     setState(() {
-      isLoading = true; // Show loading spinner
+      isLoading = true;
     });
 
     try {
-      // Simulate a payment delay
-      await Future.delayed(const Duration(seconds: 3));
+      if (widget.userId.isEmpty) {
+        throw Exception("User ID is missing.");
+      }
 
-      // Save payment status to Firestore
-      await savePaymentStatus();
+      // Ensure the customer exists before creating a subscription
+      await createCustomerIfNeeded();
+
+      // Fetch Stripe Customer ID from Firestore
+      DocumentSnapshot customerDoc = await FirebaseFirestore.instance
+          .collection('customers')
+          .doc(widget.userId)
+          .get();
+
+      if (!customerDoc.exists || customerDoc['stripeId'] == null) {
+        throw Exception('Stripe Customer ID not found.');
+      }
+
+      final stripeId = customerDoc['stripeId'];
+
+      // Call backend to create subscription
+      final response = await http.post(
+        Uri.parse('${getApiUrl()}/create-subscription'),
+        headers: {'Content-Type': 'application/json'},
+        body: json.encode({
+          'customerId': stripeId,
+          'priceId': 'price_1QeiMHR3km1Wsl68wd7wO6lh',
+        }),
+      );
+
+      if (response.statusCode != 200) {
+        throw Exception('Failed to create subscription: ${response.body}');
+      }
+
+      final data = json.decode(response.body);
+
+      // Present the Stripe PaymentSheet
+      await Stripe.instance.initPaymentSheet(
+        paymentSheetParameters: SetupPaymentSheetParameters(
+          paymentIntentClientSecret: data['clientSecret'],
+          merchantDisplayName: 'Fitopia Premium',
+        ),
+      );
+
+      await Stripe.instance.presentPaymentSheet();
+
+      // Update Firestore with subscription status
+      await FirebaseFirestore.instance
+          .collection('customers')
+          .doc(widget.userId)
+          .update({'isPremium': true});
 
       setState(() {
         isPaid = true;
       });
 
-      // Redirect to homepage
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (context) => const HomePage()),
-      );
+      Navigator.pushReplacementNamed(context, '/home');
     } catch (e) {
-      print("Error during dummy payment: $e");
+      print('Error during subscription: $e');
+      showDialog(
+        context: context,
+        builder: (context) => AlertDialog(
+          title: const Text('Subscription Error'),
+          content: Text(e.toString()),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
     } finally {
       setState(() {
-        isLoading = false; // Hide loading spinner
+        isLoading = false;
       });
-    }
-  }
-
-  // Function to save payment status to Firestore
-  Future<void> savePaymentStatus() async {
-    try {
-      await FirebaseFirestore.instance
-          .collection('users')
-          .doc(widget.userId)
-          .set({'isPremium': true}, SetOptions(merge: true));
-    } catch (e) {
-      print("Error saving payment status: $e");
     }
   }
 
@@ -122,7 +213,7 @@ class _PremiumPageState extends State<PremiumPage> {
             )
           : isLoading
               ? const Center(
-                  child: CircularProgressIndicator(), // Show loading spinner
+                  child: CircularProgressIndicator(),
                 )
               : Padding(
                   padding: const EdgeInsets.all(16.0),
@@ -147,7 +238,6 @@ class _PremiumPageState extends State<PremiumPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Free Version Card
                       Container(
                         decoration: BoxDecoration(
                           color: Colors.grey[200],
@@ -175,11 +265,8 @@ class _PremiumPageState extends State<PremiumPage> {
                         ),
                       ),
                       const SizedBox(height: 20),
-                      // Premium Version Card
                       GestureDetector(
-                        onTap: () async {
-                          await processDummyPayment();
-                        },
+                        onTap: processSubscription,
                         child: Container(
                           decoration: BoxDecoration(
                             color: const Color.fromRGBO(81, 75, 35, 1),

@@ -6,10 +6,12 @@ import 'package:flutter/material.dart';
 import 'package:fitopia/page/home.dart';
 import 'package:fitopia/page/login.dart';
 import 'package:fitopia/splashScreen.dart';
+import 'package:flutter_stripe/flutter_stripe.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  Stripe.publishableKey = "pk_test_51Qcc97R3km1Wsl68keogSvTUekALbQcaXXjY8QVC75dhNHJCuvMSqWQLoNZGBi8jlDELII3oxc1sPu6nqsvUhhGT008qoGjA7b";
   if (kIsWeb) {
     await Firebase.initializeApp(
         options: const FirebaseOptions(

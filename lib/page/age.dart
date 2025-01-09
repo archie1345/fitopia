@@ -2,7 +2,8 @@ import 'package:fitopia/page/genderSelection.dart';
 import 'package:fitopia/page/weight.dart';
 import 'package:fitopia/classes/userRegistrationData.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart' as gfonts; // Use a prefix for google_fonts
+import 'package:google_fonts/google_fonts.dart'
+    as gfonts; // Use a prefix for google_fonts
 
 class Age extends StatefulWidget {
   final UserRegistrationData userData;
@@ -14,7 +15,8 @@ class Age extends StatefulWidget {
 }
 
 class _AgeState extends State<Age> {
-  final FixedExtentScrollController _controller = FixedExtentScrollController(initialItem: 28);
+  final FixedExtentScrollController _controller =
+      FixedExtentScrollController(initialItem: 28);
 
   int selectedAge = 29;
 
@@ -24,7 +26,9 @@ class _AgeState extends State<Age> {
       onWillPop: () async {
         Navigator.pushAndRemoveUntil(
           context,
-          MaterialPageRoute(builder: (context) => GenderSelectionScreen(userData: widget.userData)),
+          MaterialPageRoute(
+              builder: (context) =>
+                  GenderSelectionScreen(userData: widget.userData)),
           (route) => false,
         );
         return false;
@@ -32,27 +36,26 @@ class _AgeState extends State<Age> {
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
-            surfaceTintColor: Colors.white,
-            leading: IconButton(
-              iconSize: 18,
-              icon: const Icon(Icons.arrow_back_ios),
-              onPressed: () {
+          surfaceTintColor: Colors.white,
+          leading: IconButton(
+            iconSize: 18,
+            icon: const Icon(Icons.arrow_back_ios),
+            onPressed: () {
               Navigator.pop(context);
             },
-
-            ),
-            title: Text(
-              'Back',
-              style: gfonts.GoogleFonts.getFont(
-                'League Spartan',
-                color: const Color(0xFF656839),
-                fontSize: 18,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            backgroundColor: Colors.white,
-            elevation: 0,
           ),
+          title: Text(
+            'Back',
+            style: gfonts.GoogleFonts.getFont(
+              'League Spartan',
+              color: const Color(0xFF656839),
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          backgroundColor: Colors.white,
+          elevation: 0,
+        ),
         body: Center(
           child: Padding(
             padding: const EdgeInsets.only(bottom: 54),
@@ -73,7 +76,7 @@ class _AgeState extends State<Age> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                  'Let us know your age so we can customize your fitness experience to match your needs and goals.',
                   textAlign: TextAlign.center,
                   style: gfonts.GoogleFonts.getFont(
                     'League Spartan',
@@ -98,11 +101,14 @@ class _AgeState extends State<Age> {
                       builder: (context, index) {
                         return Center(
                           child: AnimatedDefaultTextStyle(
-                            duration: const Duration(milliseconds: 150), // Smooth animation
+                            duration: const Duration(
+                                milliseconds: 150), // Smooth animation
                             curve: Curves.easeInOut, // Animation curve
                             style: TextStyle(
                               color: const Color(0xFF514B23),
-                              fontSize: index + 1 == selectedAge ? 60 : 30, // Bold size for selected
+                              fontSize: index + 1 == selectedAge
+                                  ? 60
+                                  : 30, // Bold size for selected
                               fontFamily: 'Poppins',
                               fontWeight: index + 1 == selectedAge
                                   ? FontWeight.bold
@@ -129,7 +135,8 @@ class _AgeState extends State<Age> {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
                   ),
                   child: Text(
                     'Continue',

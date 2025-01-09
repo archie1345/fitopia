@@ -2,8 +2,8 @@ import 'package:fitopia/page/genderSelection.dart';
 import 'package:fitopia/page/login.dart';
 import 'package:fitopia/classes/userRegistrationData.dart';
 import 'package:flutter/material.dart';
-import 'package:google_fonts/google_fonts.dart' as gfonts; // Use a prefix for google_fonts
-
+import 'package:google_fonts/google_fonts.dart'
+    as gfonts; // Use a prefix for google_fonts
 
 class GetStarted extends StatelessWidget {
   final UserRegistrationData userData = UserRegistrationData();
@@ -23,7 +23,8 @@ class GetStarted extends StatelessWidget {
       },
       child: Scaffold(
         backgroundColor: Colors.white, // Set background color
-        body: SingleChildScrollView( // Allow scrolling if content is too long
+        body: SingleChildScrollView(
+          // Allow scrolling if content is too long
           child: Padding(
             padding: const EdgeInsets.only(bottom: 62),
             child: Column(
@@ -33,10 +34,12 @@ class GetStarted extends StatelessWidget {
               children: [
                 Container(
                   width: double.infinity,
-                  height: MediaQuery.of(context).size.height * 0.5, // Set height to 50% of screen height
+                  height: MediaQuery.of(context).size.height *
+                      0.5, // Set height to 50% of screen height
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image: NetworkImage("https://via.placeholder.com/393x463"),
+                      image:
+                          NetworkImage("https://via.placeholder.com/393x463"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -65,10 +68,10 @@ class GetStarted extends StatelessWidget {
                   child: SizedBox(
                     width: 325,
                     child: Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      'Get ready to transform your fitness journey with us. Whether youre a beginner or a pro, were here to guide, motivate, and celebrate every milestone with you.',
                       textAlign: TextAlign.center,
                       style: gfonts.GoogleFonts.getFont(
-                      'League Spartan',
+                        'League Spartan',
                         color: Color(0xFF514B23),
                         fontSize: 16,
                         fontWeight: FontWeight.w400,
@@ -80,11 +83,12 @@ class GetStarted extends StatelessWidget {
                 GestureDetector(
                   onTap: () {
                     Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => GenderSelectionScreen(userData: userData),
-                    ),
-                  );
+                      context,
+                      MaterialPageRoute(
+                        builder: (context) =>
+                            GenderSelectionScreen(userData: userData),
+                      ),
+                    );
                   },
                   child: Container(
                     width: 180,
@@ -105,7 +109,7 @@ class GetStarted extends StatelessWidget {
                         'Next',
                         textAlign: TextAlign.center,
                         style: gfonts.GoogleFonts.getFont(
-                      'Poppins',
+                          'Poppins',
                           color: Color(0xFF514B23),
                           fontSize: 18,
                           fontWeight: FontWeight.w700,
@@ -119,10 +123,10 @@ class GetStarted extends StatelessWidget {
                   child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                       Text(
+                      Text(
                         'Have an account? ',
                         style: gfonts.GoogleFonts.getFont(
-                      'Montserrat',
+                          'Montserrat',
                           color: Color(0xFF514B23),
                           fontSize: 14,
                           fontWeight: FontWeight.w400,
@@ -133,14 +137,15 @@ class GetStarted extends StatelessWidget {
                         onTap: () {
                           Navigator.pushAndRemoveUntil(
                             context,
-                            MaterialPageRoute(builder: (context) => const LoginPage()),
+                            MaterialPageRoute(
+                                builder: (context) => const LoginPage()),
                             (route) => false,
                           );
                         },
                         child: Text(
                           "Login",
                           style: gfonts.GoogleFonts.getFont(
-                      'Montserrat',
+                            'Montserrat',
                             color: Color(0xFF514B23),
                             fontSize: 14,
                             fontWeight: FontWeight.w700,

@@ -83,7 +83,7 @@ class _LoginPageState extends State<LoginPage> {
                     padding: const EdgeInsets.symmetric(
                         horizontal: 15, vertical: 15),
                     child: Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      'Were excited to have you on board! Whether youre here to kickstart your fitness journey, explore new workouts, or stay consistent with your goals, youve made the right choice.',
                       textAlign: TextAlign.center,
                       style: gfonts.GoogleFonts.getFont(
                         'League Spartan',
@@ -212,7 +212,7 @@ class _LoginPageState extends State<LoginPage> {
                           Navigator.pushAndRemoveUntil(
                             context,
                             MaterialPageRoute(
-                                builder: (context) =>  GetStarted()),
+                                builder: (context) => GetStarted()),
                             (route) => false,
                           );
                         },

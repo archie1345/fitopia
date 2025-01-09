@@ -65,7 +65,7 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                 ),
                 const SizedBox(height: 20),
                 Text(
-                  'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                  'We’d like to personalize your fitness journey. Let us know how you identify:',
                   textAlign: TextAlign.center,
                   style: gfonts.GoogleFonts.getFont(
                     'League Spartan',
@@ -168,7 +168,8 @@ class _GenderSelectionScreenState extends State<GenderSelectionScreen> {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
                   ),
                   child: Text(
                     'Continue',

@@ -111,7 +111,8 @@ class HomePage extends StatelessWidget {
                     FutureBuilder<String>(
                       future: _getUsername(),
                       builder: (context, snapshot) {
-                        if (snapshot.connectionState == ConnectionState.waiting) {
+                        if (snapshot.connectionState ==
+                            ConnectionState.waiting) {
                           return const CircularProgressIndicator();
                         } else if (snapshot.hasError) {
                           return Text(
@@ -136,8 +137,8 @@ class HomePage extends StatelessWidget {
                               ),
                               const Text(
                                 "It's time to challenge your limits.",
-                                style:
-                                    TextStyle(fontSize: 16, color: Colors.black87),
+                                style: TextStyle(
+                                    fontSize: 16, color: Colors.black87),
                               ),
                             ],
                           );
@@ -215,7 +216,7 @@ class HomePage extends StatelessWidget {
                         title: 'Upper Body',
                         imageUrl:
                             'https://images.pexels.com/photos/29575475/pexels-photo-29575475/free-photo-of-muscular-man-exercising-with-gym-equipment.jpeg?auto=compress&cs=tinysrgb&dpr=1&w=500',
-                        duration: '1-2 mins',
+                        duration: '10-15 mins',
                         onTap: () async {
                           await _checkSubscriptionStatus(context);
                           if (user != null) {
@@ -229,8 +230,9 @@ class HomePage extends StatelessWidget {
                       ),
                       WorkoutCard(
                         title: 'Core',
-                        imageUrl: 'https://example.com',
-                        duration: '1-2 mins',
+                        imageUrl:
+                            'https://cdn.sanity.io/images/uhnffrl6/production/67684a557f13c0706e757b46b4c3917f23505fe0-7858x5344.jpg?w=1200&fit=min&auto=format',
+                        duration: '10-15 mins',
                         onTap: () async {
                           await _checkSubscriptionStatus(context);
                           if (user != null) {
@@ -244,8 +246,9 @@ class HomePage extends StatelessWidget {
                       ),
                       WorkoutCard(
                         title: 'Lower Body',
-                        imageUrl: 'https://example.com',
-                        duration: '1-2 mins',
+                        imageUrl:
+                            'https://www.trxtraining.com/cdn/shop/articles/goblet-squat-kettlebell-leg-exercise.jpg?v=1695794753',
+                        duration: '10-15 mins',
                         onTap: () async {
                           await _checkSubscriptionStatus(context);
                           if (user != null) {
@@ -264,8 +267,10 @@ class HomePage extends StatelessWidget {
               WeeklyChallenge(
                 title: 'Weekly Challenge',
                 description: 'Plank With Hip Twist',
-                imageUrl: 'https://example.com/challenge',
-                onTap: () => _launchURL('https://example.com/challenge'),
+                imageUrl:
+                    'https://i.ytimg.com/vi/5iLPOi_XlFE/maxresdefault.jpg',
+                onTap: () => _launchURL(
+                    'https://www.google.com/search?q=Plank+With+Hip+Twist&sca_esv=be7123bc69849c3e&udm=2&biw=1328&bih=776&sxsrf=ADLYWIJN2uBQMhB5ttd7D0wAyj33VfnQqg:1736418003222&ei=06J_Z4eiDfWb0PEP-e6csQI&ved=0ahUKEwjH142SteiKAxX1DTQIHXk3JyYQ4dUDCBA&uact=5&oq=Plank+With+Hip+Twist&gs_lp=EgNpbWciFFBsYW5rIFdpdGggSGlwIFR3aXN0MgUQABiABEiaBlAAWABwAHgAkAEAmAH2AaAB9gGqAQMyLTG4AQPIAQD4AQL4AQGYAgGgAvgBmAMAkgcDMi0xoAdN&sclient=img#vhid=uNT84WyFttWfZM&vssid=mosaic'),
               ),
               Padding(
                 padding: const EdgeInsets.all(8.0),
@@ -279,16 +284,16 @@ class HomePage extends StatelessWidget {
                 child: Row(
                   children: [
                     GestureDetector(
-                      onTap: () =>
-                          _launchURL('https://example.com/daily-routines'),
+                      onTap: () => _launchURL(
+                          'https://www.youtube.com/watch?v=H2U3HwAyBXg'),
                       child: _buildArticleCard(context, 'Daily Routines',
-                          'https://via.placeholder.com/250x150'),
+                          'https://www.eatthis.com/wp-content/uploads/sites/4/2023/09/woman-squats-1.jpeg?quality=82&strip=1'),
                     ),
                     GestureDetector(
-                      onTap: () =>
-                          _launchURL('https://example.com/supplement-guide'),
+                      onTap: () => _launchURL(
+                          'https://www.muscleandfitness.com/supplements/build-muscle/ultimate-beginner-s-guide-supplements/'),
                       child: _buildArticleCard(context, 'Supplement Guide',
-                          'https://via.placeholder.com/250x150'),
+                          'https://i.ytimg.com/vi/1E9pRu43A-8/maxresdefault.jpg'),
                     ),
                   ],
                 ),

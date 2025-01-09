@@ -16,8 +16,7 @@ class ExerciseDetailPage extends StatelessWidget {
           iconSize: 18,
           icon: const Icon(Icons.arrow_back_ios),
           onPressed: () {
-            Navigator.pushNamed(
-                context, '/exercise'); // Adjusted for navigation consistency
+            Navigator.pushNamed(context, '/exercise');
           },
         ),
         title: Text(
@@ -49,7 +48,7 @@ class ExerciseDetailPage extends StatelessWidget {
           final exerciseData = snapshot.data!.data() as Map<String, dynamic>;
 
           // Extract main exercise details
-          final name = exerciseData['name'] ?? 'Unknown Exercise';
+          final title = exerciseData['name'] ?? 'Unknown Exercise';
           final imageUrl = exerciseData['image'] ?? '';
           final time = exerciseData['time'] ?? 'Unknown time';
           final calories = exerciseData['calories'] ?? 'Unknown calories';
@@ -59,7 +58,7 @@ class ExerciseDetailPage extends StatelessWidget {
                 .collection('workouts')
                 .doc(exerciseId)
                 .collection('exercise_detail')
-                .get(), // Adjusted to fetch nested details
+                .get(),
             builder: (context, subSnapshot) {
               if (subSnapshot.connectionState == ConnectionState.waiting) {
                 return const Center(child: CircularProgressIndicator());
@@ -86,45 +85,86 @@ class ExerciseDetailPage extends StatelessWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Steps Section
-                    const Text(
-                      "Steps:",
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromRGBO(101, 104, 57, 1),
+                    // Display Exercise Image
+                    ClipRRect(
+                      borderRadius: const BorderRadius.vertical(
+                          bottom: Radius.circular(30.0)),
+                      child: Image.network(
+                        imageUrl,
+                        width: double.infinity,
+                        height: 200,
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) =>
+                            const Icon(Icons.image, size: 200), // Placeholder
                       ),
                     ),
-                    const SizedBox(height: 8.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: steps.map<Widget>((step) {
-                        return Text(
-                          "- $step",
-                          style: const TextStyle(fontSize: 14.0),
-                        );
-                      }).toList(),
-                    ),
-                    const SizedBox(height: 16.0),
 
-                    // Challenges Section
-                    const Text(
-                      "Challenges:",
-                      style: TextStyle(
-                        fontSize: 16.0,
-                        fontWeight: FontWeight.bold,
-                        color: Color.fromRGBO(101, 104, 57, 1),
+                    // Exercise Details
+                    Padding(
+                      padding: const EdgeInsets.all(16.0),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            title,
+                            style: const TextStyle(
+                              fontSize: 20.0,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromRGBO(81, 75, 35, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
+                          Text(
+                            "$time | $calories",
+                            style: const TextStyle(
+                              fontSize: 14.0,
+                              color: Colors.grey,
+                            ),
+                          ),
+                          const SizedBox(height: 16.0),
+
+                          // Steps Section
+                          const Text(
+                            "Steps:",
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromRGBO(101, 104, 57, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: steps.map<Widget>((step) {
+                              return Text(
+                                "- $step",
+                                style: const TextStyle(fontSize: 14.0),
+                              );
+                            }).toList(),
+                          ),
+                          const SizedBox(height: 16.0),
+
+                          // Challenges Section
+                          const Text(
+                            "Challenges:",
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.bold,
+                              color: Color.fromRGBO(101, 104, 57, 1),
+                            ),
+                          ),
+                          const SizedBox(height: 8.0),
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: challenges.map<Widget>((challenge) {
+                              return Text(
+                                "- $challenge",
+                                style: const TextStyle(fontSize: 14.0),
+                              );
+                            }).toList(),
+                          ),
+                        ],
                       ),
-                    ),
-                    const SizedBox(height: 8.0),
-                    Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: challenges.map<Widget>((challenge) {
-                        return Text(
-                          "- $challenge",
-                          style: const TextStyle(fontSize: 14.0),
-                        );
-                      }).toList(),
                     ),
                   ],
                 ),

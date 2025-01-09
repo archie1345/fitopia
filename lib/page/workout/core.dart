@@ -5,8 +5,7 @@ import 'package:fitopia/widget/exerciseDetailPage.dart';
 import 'package:flutter/material.dart';
 import 'package:fitopia/widget/floatingNavBar.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
-import 'package:cloud_firestore/cloud_firestore.dart'; // Add this import for Firestore
-import '../../firebase_auth_implementation/firebase_auth_services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 class Core extends StatefulWidget {
   const Core({super.key});
@@ -17,21 +16,17 @@ class Core extends StatefulWidget {
 
 class _CoreState extends State<Core> {
   String selectedDifficulty = 'BEGINNER';
-  bool isPremium = false; // To store the user's premium status
-
-  final Map<String, List<Map<String, dynamic>>> workouts = {
-    // (workouts remain unchanged)
-  };
+  bool isPremium = false;
 
   @override
   void initState() {
     super.initState();
-    _checkPremiumStatus(); // Check premium status when the widget initializes
+    _checkPremiumStatus();
   }
 
+  /// Check if the user has a premium subscription
   Future<void> _checkPremiumStatus() async {
     try {
-      // Replace 'userId' with the actual authenticated user's ID
       final userId = FirebaseAuth.instance.currentUser?.uid;
       final doc = await FirebaseFirestore.instance
           .collection('customers')
@@ -83,7 +78,7 @@ class _CoreState extends State<Core> {
           child: FloatingNavigationBar(
             onHomePressed: () => Navigator.pushAndRemoveUntil(
               context,
-              MaterialPageRoute(builder: (context) => HomePage()),
+              MaterialPageRoute(builder: (context) => const HomePage()),
               (route) => false,
             ),
             onSettingsPressed: () => Navigator.push(
@@ -110,55 +105,34 @@ class _CoreState extends State<Core> {
               ),
               // Workout List
               Expanded(
-                child: workouts[selectedDifficulty]?.isNotEmpty == true
-                    ? ListView.builder(
-                        padding: const EdgeInsets.only(bottom: 80),
-                        itemCount: workouts[selectedDifficulty]!.length,
-                        itemBuilder: (context, index) {
-                          var workout = workouts[selectedDifficulty]![index];
-                          return GestureDetector(
-                            onTap: () => Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => ExerciseDetailPage(
-                                  name: workout['name'],
-                                  image: workout['image'],
-                                  steps: workout['steps'] ?? [],
-                                  challenges: workout['challenges'] ?? [],
-                                ),
-                              ),
-                            ),
-                            child: Card(
-                              margin: const EdgeInsets.symmetric(
-                                  vertical: 8, horizontal: 16),
-                              child: Column(
-                                children: [
-                                  ClipRRect(
-                                    borderRadius: BorderRadius.circular(8.0),
-                                    child: Image.network(
-                                      workout['image'],
-                                      width: double.infinity,
-                                      height:
-                                          MediaQuery.of(context).size.height *
-                                              0.2,
-                                      fit: BoxFit.cover,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  Text(
-                                    workout['name'],
-                                    style: const TextStyle(
-                                      fontSize: 16,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ],
-                              ),
-                            ),
-                          );
-                        },
-                      )
-                    : Center(
+                child: FutureBuilder<QuerySnapshot>(
+                  future: FirebaseFirestore.instance
+                      .collection('workouts')
+                      .where('category', isEqualTo: 'Core')
+                      .where('difficulty', isEqualTo: selectedDifficulty)
+                      .get(),
+                  builder: (context, snapshot) {
+                    // Loading state
+                    if (snapshot.connectionState == ConnectionState.waiting) {
+                      return const Center(child: CircularProgressIndicator());
+                    }
+
+                    // Error state
+                    if (snapshot.hasError) {
+                      return Center(
+                        child: Text(
+                          'An error occurred: ${snapshot.error}',
+                          style: const TextStyle(
+                            fontSize: 16,
+                            color: Colors.red,
+                          ),
+                        ),
+                      );
+                    }
+
+                    // Empty data state
+                    if (!snapshot.hasData || snapshot.data!.docs.isEmpty) {
+                      return Center(
                         child: Text(
                           'No workouts available for $selectedDifficulty',
                           style: const TextStyle(
@@ -166,7 +140,86 @@ class _CoreState extends State<Core> {
                             fontWeight: FontWeight.bold,
                           ),
                         ),
-                      ),
+                      );
+                    }
+
+                    // Data available state
+                    final workouts = snapshot.data!.docs;
+                    return ListView.builder(
+                      padding: const EdgeInsets.only(bottom: 80),
+                      itemCount: workouts.length,
+                      itemBuilder: (context, index) {
+                        final workout =
+                            workouts[index].data() as Map<String, dynamic>;
+                        return GestureDetector(
+                          onTap: () => Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => ExerciseDetailPage(
+                                exerciseId: workouts[index].id,
+                              ),
+                            ),
+                          ),
+                          child: Card(
+                            margin: const EdgeInsets.symmetric(
+                                vertical: 8, horizontal: 16),
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            child: Row(
+                              children: [
+                                ClipRRect(
+                                  borderRadius: const BorderRadius.only(
+                                    topLeft: Radius.circular(16),
+                                    bottomLeft: Radius.circular(16),
+                                  ),
+                                  child: Image.network(
+                                    workout['image'] ?? '',
+                                    width: 100,
+                                    height: 100,
+                                    fit: BoxFit.cover,
+                                    errorBuilder:
+                                        (context, error, stackTrace) =>
+                                            const Icon(
+                                      Icons.image_not_supported,
+                                      size: 100,
+                                      color: Colors.grey,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 16),
+                                Expanded(
+                                  child: Column(
+                                    crossAxisAlignment:
+                                        CrossAxisAlignment.start,
+                                    children: [
+                                      Text(
+                                        workout['name'] ?? 'Unnamed Workout',
+                                        style: gfonts.GoogleFonts.leagueSpartan(
+                                          fontSize: 18,
+                                          fontWeight: FontWeight.bold,
+                                          color: const Color(0xFF656839),
+                                        ),
+                                      ),
+                                      const SizedBox(height: 4),
+                                      Text(
+                                        '${workout['time'] ?? 'Unknown Time'} | ${workout['calories'] ?? 'Unknown Calories'}',
+                                        style: gfonts.GoogleFonts.leagueSpartan(
+                                          fontSize: 14,
+                                          color: Colors.grey,
+                                        ),
+                                      ),
+                                    ],
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        );
+                      },
+                    );
+                  },
+                ),
               ),
             ],
           ),

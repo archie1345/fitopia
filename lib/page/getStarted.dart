@@ -38,8 +38,8 @@ class GetStarted extends StatelessWidget {
                       0.5, // Set height to 50% of screen height
                   decoration: const BoxDecoration(
                     image: DecorationImage(
-                      image:
-                          NetworkImage("https://via.placeholder.com/393x463"),
+                      image: NetworkImage(
+                          "https://hips.hearstapps.com/hmg-prod/images/shot-of-a-young-woman-working-out-with-weights-in-a-royalty-free-image-1705679985.jpg"),
                       fit: BoxFit.cover,
                     ),
                   ),
@@ -62,20 +62,20 @@ class GetStarted extends StatelessWidget {
                   width: double.infinity,
                   height: 90,
                   decoration: const BoxDecoration(color: Color(0xFFCBC9AD)),
-                ),
-                Padding(
-                  padding: const EdgeInsets.all(20),
-                  child: SizedBox(
-                    width: 325,
-                    child: Text(
-                      'Get ready to transform your fitness journey with us. Whether youre a beginner or a pro, were here to guide, motivate, and celebrate every milestone with you.',
-                      textAlign: TextAlign.center,
-                      style: gfonts.GoogleFonts.getFont(
-                        'League Spartan',
-                        color: Color(0xFF514B23),
-                        fontSize: 16,
-                        fontWeight: FontWeight.w400,
-                        height: 1,
+                  child: Padding(
+                    padding: const EdgeInsets.all(20),
+                    child: SizedBox(
+                      width: 325,
+                      child: Text(
+                        'Get ready to transform your fitness journey with us. Whether youre a beginner or a pro, were here to guide, motivate, and celebrate every milestone with you.',
+                        textAlign: TextAlign.center,
+                        style: gfonts.GoogleFonts.getFont(
+                          'League Spartan',
+                          color: Color(0xFF514B23),
+                          fontSize: 16,
+                          fontWeight: FontWeight.w400,
+                          height: 1,
+                        ),
                       ),
                     ),
                   ),

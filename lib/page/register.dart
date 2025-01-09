@@ -18,7 +18,8 @@ class _FillProfileState extends State<FillProfile> {
   final TextEditingController usernameController = TextEditingController();
   final TextEditingController emailController = TextEditingController();
   final TextEditingController passwordController = TextEditingController();
-  final TextEditingController confirmPasswordController = TextEditingController();
+  final TextEditingController confirmPasswordController =
+      TextEditingController();
 
   final FirebaseAuth _auth = FirebaseAuth.instance;
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
@@ -38,9 +39,10 @@ class _FillProfileState extends State<FillProfile> {
   Widget build(BuildContext context) {
     return WillPopScope(
       onWillPop: () async {
-      Navigator.pushNamedAndRemoveUntil(context, "/getStarted", (route) => false);
-      return false;
-    },
+        Navigator.pushNamedAndRemoveUntil(
+            context, "/getStarted", (route) => false);
+        return false;
+      },
       child: Scaffold(
         backgroundColor: Colors.white,
         appBar: AppBar(
@@ -49,8 +51,9 @@ class _FillProfileState extends State<FillProfile> {
             iconSize: 18,
             icon: const Icon(Icons.arrow_back_ios),
             onPressed: () {
-            Navigator.pushNamedAndRemoveUntil(context, "/getStarted", (route) => false);
-          },
+              Navigator.pushNamedAndRemoveUntil(
+                  context, "/getStarted", (route) => false);
+            },
           ),
           title: Text(
             'Back',
@@ -84,8 +87,7 @@ class _FillProfileState extends State<FillProfile> {
                   ),
                   const SizedBox(height: 10),
                   const Text(
-                    'Lorem ipsum dolor sit amet, consectetur adipiscing elit, '
-                    'sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                    'Tell us a bit more about yourself to unlock a fully personalized fitness experience.',
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       color: Color(0xFF514B23),
@@ -93,10 +95,15 @@ class _FillProfileState extends State<FillProfile> {
                     ),
                   ),
                   const SizedBox(height: 20),
-                  _buildInputField('Username', usernameController, hintText: 'Enter username'),
-                  _buildInputField('Email', emailController, isEmail: true, hintText: 'Enter email'),
-                  _buildInputField('Password', passwordController, isPassword: true, hintText: 'Enter password'),
-                  _buildInputField('Confirm Password', confirmPasswordController, isPassword: true, hintText: 'Confirm password'),
+                  _buildInputField('Username', usernameController,
+                      hintText: 'Enter username'),
+                  _buildInputField('Email', emailController,
+                      isEmail: true, hintText: 'Enter email'),
+                  _buildInputField('Password', passwordController,
+                      isPassword: true, hintText: 'Enter password'),
+                  _buildInputField(
+                      'Confirm Password', confirmPasswordController,
+                      isPassword: true, hintText: 'Confirm password'),
                   const SizedBox(height: 30),
                   GestureDetector(
                     onTap: () {
@@ -111,10 +118,13 @@ class _FillProfileState extends State<FillProfile> {
                       ),
                       child: Center(
                         child: isSigningUp
-                            ? const CircularProgressIndicator(color: Colors.white)
+                            ? const CircularProgressIndicator(
+                                color: Colors.white)
                             : const Text(
                                 "Register",
-                                style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+                                style: TextStyle(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.bold),
                               ),
                       ),
                     ),
@@ -160,7 +170,8 @@ class _FillProfileState extends State<FillProfile> {
 
     // Validate fields
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Please fill all fields.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Please fill all fields.')));
       setState(() {
         isSigningUp = false;
       });
@@ -168,7 +179,8 @@ class _FillProfileState extends State<FillProfile> {
     }
 
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Passwords do not match!')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Passwords do not match!')));
       setState(() {
         isSigningUp = false;
       });
@@ -176,7 +188,8 @@ class _FillProfileState extends State<FillProfile> {
     }
 
     try {
-      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(email: email, password: password);
+      UserCredential userCredential = await _auth
+          .createUserWithEmailAndPassword(email: email, password: password);
 
       if (userCredential.user != null) {
         await _firestore.collection('users').doc(userCredential.user!.uid).set({
@@ -189,11 +202,13 @@ class _FillProfileState extends State<FillProfile> {
           'createdAt': FieldValue.serverTimestamp(),
         });
 
-        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Registration successful!')));
+        ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Registration successful!')));
         Navigator.pushNamed(context, "/home");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('Registration failed: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('Registration failed: $e')));
     } finally {
       setState(() {
         isSigningUp = false;
@@ -201,7 +216,8 @@ class _FillProfileState extends State<FillProfile> {
     }
   }
 
-  Widget _buildInputField(String label, TextEditingController controller, {bool isPassword = false, bool isEmail = false, String hintText = ''}) {
+  Widget _buildInputField(String label, TextEditingController controller,
+      {bool isPassword = false, bool isEmail = false, String hintText = ''}) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
       child: Column(
@@ -209,17 +225,23 @@ class _FillProfileState extends State<FillProfile> {
         children: [
           Text(
             label,
-            style: const TextStyle(color: Color(0xFF514B23), fontSize: 18, fontWeight: FontWeight.w500),
+            style: const TextStyle(
+                color: Color(0xFF514B23),
+                fontSize: 18,
+                fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 5),
           TextFormField(
             controller: controller,
             obscureText: isPassword,
-            keyboardType: !isEmail ? TextInputType.text : TextInputType.emailAddress,
+            keyboardType:
+                !isEmail ? TextInputType.text : TextInputType.emailAddress,
             decoration: InputDecoration(
               hintText: hintText,
-              border: OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
-              contentPadding: const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
+              border:
+                  OutlineInputBorder(borderRadius: BorderRadius.circular(15)),
+              contentPadding:
+                  const EdgeInsets.symmetric(horizontal: 15, vertical: 15),
             ),
           ),
         ],

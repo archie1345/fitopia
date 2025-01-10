@@ -1,13 +1,14 @@
+import 'dart:convert';
+import 'package:http/http.dart' as http;
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 
 class PremiumPage extends StatefulWidget {
-  final String userId; // User ID from Firebase Authentication
+  final String userId;
 
-  const PremiumPage({Key? key, required this.userId}) : super(key: key);
+  const PremiumPage({super.key, required this.userId});
 
   @override
   State<PremiumPage> createState() => _PremiumPageState();
@@ -16,9 +17,9 @@ class PremiumPage extends StatefulWidget {
 class _PremiumPageState extends State<PremiumPage> {
   bool isPaid = false;
   bool isLoading = false;
+  late Stream<DocumentSnapshot<Map<String, dynamic>>> subscriptionStream;
 
-  // Flag to determine environment (local or production)
-  static const bool isLocal = false; // Set to true for local, false for production
+  static const bool isLocal = false;
   static const String localApiUrl = 'http://127.0.0.1:5001/fitopia-42331/us-central1/api';
   static const String productionApiUrl = 'https://us-central1-fitopia-42331.cloudfunctions.net/api';
 
@@ -29,123 +30,113 @@ class _PremiumPageState extends State<PremiumPage> {
   @override
   void initState() {
     super.initState();
-    checkSubscriptionStatus(); // Check subscription status on page load
-  }
 
-  Future<void> createCustomerIfNeeded() async {
-    try {
-      // Check if the user exists in Firestore
-      DocumentSnapshot customerDoc = await FirebaseFirestore.instance
-          .collection('customers')
-          .doc(widget.userId)
-          .get();
+    subscriptionStream = FirebaseFirestore.instance
+        .collection('customers')
+        .doc(widget.userId)
+        .snapshots();
 
-      // If the user doesn't have a Stripe ID, create a new customer
-      if (!customerDoc.exists || customerDoc['stripeId'] == null) {
-        final response = await http.post(
-          Uri.parse('${getApiUrl()}/create-customer'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode({
-            'email': 'test@example.com', // Replace with the user's actual email
-            'userId': widget.userId,
-          }),
-        );
-
-        if (response.statusCode != 200) {
-          throw Exception('Failed to create customer: ${response.body}');
+    subscriptionStream.listen((snapshot) {
+      if (snapshot.exists) {
+        final data = snapshot.data();
+        if (data != null) {
+          setState(() {
+            isPaid = data['isPremium'] ?? false;
+          });
         }
-
-        final data = json.decode(response.body);
-
-        // Update Firestore with the new Stripe customer ID
-        await FirebaseFirestore.instance
-            .collection('customers')
-            .doc(widget.userId)
-            .set({
-          'stripeId': data['customer']['id'],
-        }, SetOptions(merge: true));
-
-        print('Customer created successfully: ${data['customer']['id']}');
-      } else {
-        print('Customer already exists: ${customerDoc['stripeId']}');
       }
-    } catch (e) {
-      print('Error creating customer: $e');
-      throw Exception('Error creating customer: $e');
-    }
+    });
   }
 
-  Future<void> checkSubscriptionStatus() async {
-    try {
-      if (widget.userId.isEmpty) {
-        throw Exception("User ID is missing.");
-      }
+ Future<void> createCustomerIfNeeded() async {
+  try {
+    final customerDoc = await FirebaseFirestore.instance
+        .collection('customers')
+        .doc(widget.userId)
+        .get();
 
-      DocumentSnapshot customerDoc = await FirebaseFirestore.instance
-          .collection('customers')
-          .doc(widget.userId)
-          .get();
-
-      if (customerDoc.exists && customerDoc['isPremium'] == true) {
-        setState(() {
-          isPaid = true;
-        });
-        Navigator.pushReplacementNamed(context, '/home');
-      }
-    } catch (e) {
-      print('Error checking subscription status: $e');
+    if (customerDoc.exists && customerDoc.data()?['stripeId'] != null) {
+      print('Customer already exists with Stripe ID: ${customerDoc.data()?['stripeId']}');
+      return;
     }
+
+    final url = Uri.parse('${getApiUrl()}/create-customer');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'email': FirebaseAuth.instance.currentUser?.email,
+        'userId': widget.userId,
+      }),
+    );
+
+    if (response.statusCode == 200) {
+      final responseData = json.decode(response.body);
+      final stripeId = responseData['customer']['id'];
+      await FirebaseFirestore.instance.collection('customers').doc(widget.userId).set({
+        'stripeId': stripeId,
+        'isPremium': false,
+      }, SetOptions(merge: true));
+    } else {
+      throw Exception('Failed to create customer: ${response.body}');
+    }
+  } catch (e) {
+    print('Error during createCustomerIfNeeded: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Failed to create customer: $e')),
+    );
   }
+}
 
   Future<void> processSubscription() async {
-    setState(() {
-      isLoading = true;
-    });
+  setState(() {
+    isLoading = true;
+  });
 
-    try {
-      if (widget.userId.isEmpty) {
-        throw Exception("User ID is missing.");
-      }
+  try {
+    // Ensure the customer is created before proceeding
+    await createCustomerIfNeeded();
 
-      // Ensure the customer exists before creating a subscription
-      await createCustomerIfNeeded();
+    // Retrieve the customer ID from Firestore
+    final customerDoc = await FirebaseFirestore.instance
+        .collection('customers')
+        .doc(widget.userId)
+        .get();
 
-      // Fetch Stripe Customer ID from Firestore
-      DocumentSnapshot customerDoc = await FirebaseFirestore.instance
-          .collection('customers')
-          .doc(widget.userId)
-          .get();
+    if (!customerDoc.exists || customerDoc.data()?['stripeId'] == null) {
+      throw Exception("Customer ID not found. Ensure customer creation succeeds.");
+    }
 
-      if (!customerDoc.exists || customerDoc['stripeId'] == null) {
-        throw Exception('Stripe Customer ID not found.');
-      }
+    final customerId = customerDoc.data()?['stripeId'];
+    print("Retrieved Customer ID: $customerId");
 
-      final stripeId = customerDoc['stripeId'];
+    // Call the backend to create a subscription
+    final url = Uri.parse('${getApiUrl()}/create-subscription');
+    final response = await http.post(
+      url,
+      headers: {'Content-Type': 'application/json'},
+      body: json.encode({
+        'customerId': customerId,
+        'priceId': "price_1QeiMHR3km1Wsl68wd7wO6lh",
+      }),
+    );
 
-      // Call backend to create subscription
-      final response = await http.post(
-        Uri.parse('${getApiUrl()}/create-subscription'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'customerId': stripeId,
-          'priceId': 'price_1QeiMHR3km1Wsl68wd7wO6lh',
-        }),
-      );
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to create subscription: ${response.body}');
-      }
-
+    // Handle the response
+    if (response.statusCode == 200) {
       final data = json.decode(response.body);
+      final clientSecret = data['clientSecret'];
 
-      // Present the Stripe PaymentSheet
+      print("Received client secret for Payment Intent: $clientSecret");
+
+      // Initialize the Stripe Payment Sheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
-          paymentIntentClientSecret: data['clientSecret'],
+          paymentIntentClientSecret: clientSecret,
           merchantDisplayName: 'Fitopia Premium',
         ),
       );
 
+      // Present the Payment Sheet to the user
       await Stripe.instance.presentPaymentSheet();
 
       // Update Firestore with subscription status
@@ -158,28 +149,26 @@ class _PremiumPageState extends State<PremiumPage> {
         isPaid = true;
       });
 
-      Navigator.pushReplacementNamed(context, '/home');
-    } catch (e) {
-      print('Error during subscription: $e');
-      showDialog(
-        context: context,
-        builder: (context) => AlertDialog(
-          title: const Text('Subscription Error'),
-          content: Text(e.toString()),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.pop(context),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Payment successful!')),
       );
-    } finally {
-      setState(() {
-        isLoading = false;
-      });
+    } else {
+      throw Exception('Failed to create Payment Intent: ${response.body}');
     }
+  } catch (e) {
+    // Catch any errors during the subscription process
+    print('Error during payment: $e');
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text('Payment failed: $e')),
+    );
+  } finally {
+    // Reset the loading state
+    setState(() {
+      isLoading = false;
+    });
   }
+}
+
 
   @override
   Widget build(BuildContext context) {
@@ -215,106 +204,108 @@ class _PremiumPageState extends State<PremiumPage> {
               ? const Center(
                   child: CircularProgressIndicator(),
                 )
-              : Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      const Text(
-                        "Ready to transform your body and reach its peak?",
-                        style: TextStyle(
-                          fontSize: 20,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black87,
+              : SingleChildScrollView(
+                  child: Padding(
+                    padding: const EdgeInsets.all(16.0),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        const Text(
+                          "Ready to transform your body and reach its peak?",
+                          style: TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black87,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 10),
-                      const Text(
-                        "BENEFITS USING PREMIUM:",
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
-                          color: Colors.black54,
+                        const SizedBox(height: 10),
+                        const Text(
+                          "BENEFITS USING PREMIUM:",
+                          style: TextStyle(
+                            fontSize: 16,
+                            fontWeight: FontWeight.bold,
+                            color: Colors.black54,
+                          ),
                         ),
-                      ),
-                      const SizedBox(height: 20),
-                      Container(
-                        decoration: BoxDecoration(
-                          color: Colors.grey[200],
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        padding: const EdgeInsets.all(16),
-                        child: Column(
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: const [
-                            Text(
-                              "FREE",
-                              style: TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.black87,
-                              ),
-                            ),
-                            SizedBox(height: 8),
-                            Text(
-                              "Access limited features and basic functionalities.",
-                              style: TextStyle(
-                                  fontSize: 14, color: Colors.black87),
-                            ),
-                          ],
-                        ),
-                      ),
-                      const SizedBox(height: 20),
-                      GestureDetector(
-                        onTap: processSubscription,
-                        child: Container(
+                        const SizedBox(height: 20),
+                        Container(
                           decoration: BoxDecoration(
-                            color: const Color.fromRGBO(81, 75, 35, 1),
+                            color: Colors.grey[200],
                             borderRadius: BorderRadius.circular(12),
                           ),
                           padding: const EdgeInsets.all(16),
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              const Text(
-                                "PREMIUM",
+                            children: const [
+                              Text(
+                                "FREE",
                                 style: TextStyle(
                                   fontSize: 18,
                                   fontWeight: FontWeight.bold,
-                                  color: Colors.white,
+                                  color: Colors.black87,
                                 ),
                               ),
-                              const SizedBox(height: 8),
-                              const Text(
-                                "Unlock exclusive features and personalized plans.",
+                              SizedBox(height: 8),
+                              Text(
+                                "Access limited features and basic functionalities.",
                                 style: TextStyle(
-                                    fontSize: 14, color: Colors.white),
-                              ),
-                              const SizedBox(height: 8),
-                              Row(
-                                mainAxisAlignment:
-                                    MainAxisAlignment.spaceBetween,
-                                children: const [
-                                  Text(
-                                    "Click below to upgrade now!",
-                                    style: TextStyle(
-                                        fontSize: 14, color: Colors.white70),
-                                  ),
-                                  Text(
-                                    "UPGRADE",
-                                    style: TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.bold,
-                                      color: Colors.white,
-                                    ),
-                                  ),
-                                ],
+                                    fontSize: 14, color: Colors.black87),
                               ),
                             ],
                           ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(height: 20),
+                        GestureDetector(
+                          onTap: () => processSubscription(),
+                          child: Container(
+                            decoration: BoxDecoration(
+                              color: const Color.fromRGBO(81, 75, 35, 1),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                const Text(
+                                  "PREMIUM",
+                                  style: TextStyle(
+                                    fontSize: 18,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                const SizedBox(height: 8),
+                                const Text(
+                                  "Unlock exclusive features and personalized plans.",
+                                  style: TextStyle(
+                                      fontSize: 14, color: Colors.white),
+                                ),
+                                const SizedBox(height: 8),
+                                Row(
+                                  mainAxisAlignment:
+                                      MainAxisAlignment.spaceBetween,
+                                  children: const [
+                                    Text(
+                                      "Click below to upgrade now!",
+                                      style: TextStyle(
+                                          fontSize: 14, color: Colors.white70),
+                                    ),
+                                    Text(
+                                      "UPGRADE",
+                                      style: TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.bold,
+                                        color: Colors.white,
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
     );

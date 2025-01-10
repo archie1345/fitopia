@@ -110,7 +110,7 @@ class _HeightSelectorState extends State<HeightSelector> {
                   child: SizedBox(
                     width: 323,
                     child: Text(
-                      'Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.',
+                      'We’ll use your height to tailor your fitness journey and provide accurate health insights.',
                       textAlign: TextAlign.center,
                       style: gfonts.GoogleFonts.getFont(
                         'League Spartan',
@@ -165,8 +165,7 @@ class _HeightSelectorState extends State<HeightSelector> {
                                 '$height',
                                 style: gfonts.GoogleFonts.getFont(
                                   'Poppins',
-                                  fontSize:
-                                      height == selectedHeight ? 50 : 25,
+                                  fontSize: height == selectedHeight ? 50 : 25,
                                   fontWeight: height == selectedHeight
                                       ? FontWeight.bold
                                       : FontWeight.normal,
@@ -191,7 +190,8 @@ class _HeightSelectorState extends State<HeightSelector> {
                     Navigator.pushAndRemoveUntil(
                       context,
                       MaterialPageRoute(
-                        builder: (context) => FillProfile(userData: widget.userData),
+                        builder: (context) =>
+                            FillProfile(userData: widget.userData),
                       ),
                       (route) => false,
                     );
@@ -199,7 +199,8 @@ class _HeightSelectorState extends State<HeightSelector> {
                   style: ElevatedButton.styleFrom(
                     foregroundColor: Colors.black,
                     backgroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(horizontal: 50, vertical: 15),
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 50, vertical: 15),
                   ),
                   child: Text(
                     'Continue',

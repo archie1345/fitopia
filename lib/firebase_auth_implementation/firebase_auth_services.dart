@@ -11,23 +11,25 @@ class FirebaseAuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
   /// Create a new Stripe customer and save the ID to Firestore
-  Future<void> createStripeCustomer() async {
+  Future<void> createStripeCustomer(String userId, String email) async {
     try {
-      final userId = _firebaseAuth.currentUser?.uid;
-      final email = _firebaseAuth.currentUser?.email;
-
-      if (userId == null || email == null || email.isEmpty) {
-        throw Exception("User is not logged in or email is missing.");
+      // Validate the email
+      if (email.isEmpty) {
+        throw Exception("User email is missing.");
       }
 
+      // Check Firestore for an existing Stripe customer ID
       final customerDoc = await _firestore.collection('customers').doc(userId).get();
 
       if (customerDoc.exists && customerDoc.data()?['stripeId'] != null) {
         print('Customer already exists with Stripe ID: ${customerDoc.data()?['stripeId']}');
-        return;
+        return; // Customer already exists, no further action required
       }
 
+      // API URL for creating a Stripe customer
       final url = Uri.parse('https://us-central1-fitopia-42331.cloudfunctions.net/api/create-customer');
+
+      // Call the backend API to create the customer
       final response = await http.post(
         url,
         headers: {'Content-Type': 'application/json'},
@@ -35,21 +37,27 @@ class FirebaseAuthService {
       );
 
       if (response.statusCode == 200) {
+        // Parse the API response
         final responseData = json.decode(response.body);
         final stripeId = responseData['customer']['id'];
 
+        // Save the Stripe ID and default isPremium status to Firestore
         await _firestore.collection('customers').doc(userId).set({
           'stripeId': stripeId,
           'isPremium': false,
         }, SetOptions(merge: true));
 
-        print('Stripe customer created successfully: $stripeId');
+        print('Stripe customer created successfully with ID: $stripeId');
       } else {
-        throw Exception('Failed to create customer: ${response.body}');
+        // Handle errors from the backend API
+        print('Error creating Stripe customer: ${response.body}');
+        throw Exception('Failed to create Stripe customer: ${response.body}');
       }
     } catch (e) {
-      print('Error creating Stripe customer: $e');
+      // Handle unexpected errors
+      print('Error during Stripe customer creation: $e');
       showToast(message: 'Failed to create Stripe customer.');
+      rethrow;
     }
   }
 
@@ -79,7 +87,7 @@ class FirebaseAuthService {
       });
 
       // Create a Stripe Customer
-      await createStripeCustomer();
+      await createStripeCustomer(user.uid, email);
 
       return user;
     } catch (e) {
@@ -149,12 +157,9 @@ class FirebaseAuthService {
             'email': user.email ?? 'N/A',
             'uid': user.uid,
             'createdAt': FieldValue.serverTimestamp(),
-            'gender' : 'Not Stated',
-            'height' : 170,
-            'weight' : 60
           }, SetOptions(merge: true));
 
-          await createStripeCustomer();
+          await createStripeCustomer(user.uid, user.email ?? "N/A");
           Navigator.pushNamed(context, "/home");
         }
       }

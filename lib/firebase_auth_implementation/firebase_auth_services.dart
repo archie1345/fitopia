@@ -66,7 +66,7 @@ class FirebaseAuthService {
       String email, String password, String username) async {
     try {
       final credential = await _firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
+        email: email ?? "N/A",
         password: password,
       );
 
@@ -80,14 +80,15 @@ class FirebaseAuthService {
 
       // Save user to Firestore
       await _firestore.collection('users').doc(user.uid).set({
-        'email': email,
+        'email': email ?? "N/A",
         'username': username,
         'uid': user.uid,
         'createdAt': Timestamp.now(),
       });
 
       // Create a Stripe Customer
-      await createStripeCustomer(user.uid, email);
+      await createStripeCustomer(user.uid, email ?? "N/A");
+
 
       return user;
     } catch (e) {

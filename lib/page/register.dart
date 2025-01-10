@@ -113,7 +113,7 @@ class _FillProfileState extends State<FillProfile> {
                       width: 150,
                       height: 45,
                       decoration: BoxDecoration(
-                        color: Color.fromRGBO(203, 201, 173, 1),
+                        color: const Color.fromRGBO(203, 201, 173, 1),
                         borderRadius: BorderRadius.circular(40),
                       ),
                       child: Center(
@@ -158,6 +158,7 @@ class _FillProfileState extends State<FillProfile> {
     );
   }
 
+  /// Registration Logic
   void _register() async {
     setState(() {
       isSigningUp = true;
@@ -170,17 +171,35 @@ class _FillProfileState extends State<FillProfile> {
 
     // Validate fields
     if (username.isEmpty || email.isEmpty || password.isEmpty) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Please fill all fields.')));
+      _showErrorSnackbar('Please fill all fields.');
       setState(() {
         isSigningUp = false;
       });
       return;
     }
 
+    // Validate email
+    if (!_validateField(email, 'email')) {
+      _showErrorSnackbar('Enter a valid email address.');
+      setState(() {
+        isSigningUp = false;
+      });
+      return;
+    }
+
+    // Validate password
+    if (!_validateField(password, 'password')) {
+      _showErrorSnackbar(
+          'Password must be at least 8 characters long and include an uppercase letter, a number, and a special character.');
+      setState(() {
+        isSigningUp = false;
+      });
+      return;
+    }
+
+    // Check if passwords match
     if (password != confirmPassword) {
-      ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Passwords do not match!')));
+      _showErrorSnackbar('Passwords do not match!');
       setState(() {
         isSigningUp = false;
       });
@@ -188,10 +207,14 @@ class _FillProfileState extends State<FillProfile> {
     }
 
     try {
-      UserCredential userCredential = await _auth
-          .createUserWithEmailAndPassword(email: email, password: password);
+      // Register the user
+      UserCredential userCredential = await _auth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
 
       if (userCredential.user != null) {
+        // Store additional details in Firestore
         await _firestore.collection('users').doc(userCredential.user!.uid).set({
           'username': username,
           'email': email,
@@ -207,8 +230,7 @@ class _FillProfileState extends State<FillProfile> {
         Navigator.pushNamed(context, "/home");
       }
     } catch (e) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(SnackBar(content: Text('Registration failed: $e')));
+      _showErrorSnackbar('Registration failed: $e');
     } finally {
       setState(() {
         isSigningUp = false;
@@ -216,6 +238,27 @@ class _FillProfileState extends State<FillProfile> {
     }
   }
 
+  /// Helper for validation
+  bool _validateField(String value, String type) {
+    if (type == 'email') {
+      final emailRegEx = r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$';
+      return RegExp(emailRegEx).hasMatch(value);
+    } else if (type == 'password') {
+      final passwordRegEx =
+          r'^(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&_])[A-Za-z\d@$!%*?&_]{8,}$';
+      return RegExp(passwordRegEx).hasMatch(value);
+    }
+    return value.isNotEmpty;
+  }
+
+  /// Helper to show error messages
+  void _showErrorSnackbar(String message) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(content: Text(message)),
+    );
+  }
+
+  /// Input Field Builder
   Widget _buildInputField(String label, TextEditingController controller,
       {bool isPassword = false, bool isEmail = false, String hintText = ''}) {
     return Padding(

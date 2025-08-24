@@ -1,15 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Theme applied to the Android Window while the process is starting -->
-    <style name="LaunchTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
+    <!-- Theme for a splash screen displayed on launch of the application. -->
+    <style name="LaunchTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Show a branding image. -->
         <item name="android:windowBackground">@drawable/launch_background</item>
     </style>
 
-    <!-- App Theme -->
-    <style name="AppTheme" parent="Theme.MaterialComponents.DayNight.NoActionBar">
-        <item name="colorPrimary">@color/colorPrimary</item>
-        <item name="colorPrimaryDark">@color/colorPrimaryDark</item>
-        <item name="colorAccent">@color/colorAccent</item>
+    <!-- Theme for the Normal Theme. -->
+    <style name="NormalTheme" parent="Theme.MaterialComponents.Light.NoActionBar">
+        <!-- Show a branding image. -->
+        <item name="android:windowBackground">@android:color/white</item>
     </style>
 </resources>
-

@@ -1,26 +1,52 @@
 {
   "project_info": {
-    "project_number": "218297721418",
-    "project_id": "fitopia-42331",
-    "storage_bucket": "fitopia-42331.firebasestorage.app"
+    "project_number": "374290811690",
+    "firebase_url": "https://fitopia-7f494-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "fitopia-7f494",
+    "storage_bucket": "fitopia-7f494.firebasestorage.app"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:218297721418:android:25e6b2ec677f2fa16b7cb3",
+        "mobilesdk_app_id": "1:374290811690:android:1d8994fd17f31cb33a6c53",
         "android_client_info": {
           "package_name": "com.example.fitopia"
         }
       },
-      "oauth_client": [],
+      "oauth_client": [
+        {
+          "client_id": "374290811690-oqele7nqfsjdv0mcdk2tddfhh2rbcmni.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.fitopia",
+            "certificate_hash": "aaead44c69892a4e4bcfc7570741358c029f0f75"
+          }
+        },
+        {
+          "client_id": "374290811690-mohiloasjv840dh1qd0eiihscdp2u0m5.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
       "api_key": [
         {
-          "current_key": "AIzaSyAFaoICmTSW9U5oMSniu2afWUD7NER-5f0"
+          "current_key": "AIzaSyBOFFs7l-nWvGhZ4XXTq2G4mrkSs_CyJBw"
         }
       ],
       "services": {
         "appinvite_service": {
-          "other_platform_oauth_client": []
+          "other_platform_oauth_client": [
+            {
+              "client_id": "374290811690-mohiloasjv840dh1qd0eiihscdp2u0m5.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "374290811690-irf278miloep92d7pshajk77odalpl2m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.fitopia"
+              }
+            }
+          ]
         }
       }
     }

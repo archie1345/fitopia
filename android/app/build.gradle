@@ -8,7 +8,7 @@ plugins {
 android {
     namespace = "com.example.fitopia"
     compileSdk = flutter.compileSdkVersion
-    ndkVersion "25.1.8937393"
+    ndkVersion "29.0.13846066"
 
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_17
@@ -19,7 +19,7 @@ android {
     }
 
     defaultConfig {
-        minSdkVersion 23 // Ensure this is set to 23
+        minSdkVersion flutter.minSdkVersion // Ensure this is set to 23
         applicationId = "com.example.fitopia"
         targetSdk = flutter.targetSdkVersion
         versionCode = flutter.versionCode
@@ -47,3 +47,5 @@ dependencies {
     implementation 'com.google.firebase:firebase-analytics'
     implementation 'com.google.android.material:material:1.9.0'
 }
+
+// apply plugin: 'com.google.gms.google-services'

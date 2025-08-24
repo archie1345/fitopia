@@ -1,3 +1,4 @@
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_stripe/flutter_stripe.dart';
@@ -6,8 +7,7 @@ import 'dart:convert';
 
 class PremiumPage extends StatefulWidget {
   final String userId; // User ID from Firebase Authentication
-
-  const PremiumPage({Key? key, required this.userId}) : super(key: key);
+  const PremiumPage({super.key, required this.userId});
 
   @override
   State<PremiumPage> createState() => _PremiumPageState();
@@ -17,62 +17,12 @@ class _PremiumPageState extends State<PremiumPage> {
   bool isPaid = false;
   bool isLoading = false;
 
-  // Flag to determine environment (local or production)
-  static const bool isLocal = false; // Set to true for local, false for production
-  static const String localApiUrl = 'http://127.0.0.1:5001/fitopia-42331/us-central1/api';
-  static const String productionApiUrl = 'https://us-central1-fitopia-42331.cloudfunctions.net/api';
-
-  String getApiUrl() {
-    return isLocal ? localApiUrl : productionApiUrl;
-  }
+  static const String ApiUrl = "https://api-3fhkguk6lq-uc.a.run.app";
 
   @override
   void initState() {
     super.initState();
     checkSubscriptionStatus(); // Check subscription status on page load
-  }
-
-  Future<void> createCustomerIfNeeded() async {
-    try {
-      // Check if the user exists in Firestore
-      DocumentSnapshot customerDoc = await FirebaseFirestore.instance
-          .collection('customers')
-          .doc(widget.userId)
-          .get();
-
-      // If the user doesn't have a Stripe ID, create a new customer
-      if (!customerDoc.exists || customerDoc['stripeId'] == null) {
-        final response = await http.post(
-          Uri.parse('${getApiUrl()}/create-customer'),
-          headers: {'Content-Type': 'application/json'},
-          body: json.encode({
-            'email': 'test@example.com', // Replace with the user's actual email
-            'userId': widget.userId,
-          }),
-        );
-
-        if (response.statusCode != 200) {
-          throw Exception('Failed to create customer: ${response.body}');
-        }
-
-        final data = json.decode(response.body);
-
-        // Update Firestore with the new Stripe customer ID
-        await FirebaseFirestore.instance
-            .collection('customers')
-            .doc(widget.userId)
-            .set({
-          'stripeId': data['customer']['id'],
-        }, SetOptions(merge: true));
-
-        print('Customer created successfully: ${data['customer']['id']}');
-      } else {
-        print('Customer already exists: ${customerDoc['stripeId']}');
-      }
-    } catch (e) {
-      print('Error creating customer: $e');
-      throw Exception('Error creating customer: $e');
-    }
   }
 
   Future<void> checkSubscriptionStatus() async {
@@ -107,29 +57,18 @@ class _PremiumPageState extends State<PremiumPage> {
         throw Exception("User ID is missing.");
       }
 
-      // Ensure the customer exists before creating a subscription
-      await createCustomerIfNeeded();
+      
+      final idToken = await FirebaseAuth.instance.currentUser!.getIdToken();
 
-      // Fetch Stripe Customer ID from Firestore
-      DocumentSnapshot customerDoc = await FirebaseFirestore.instance
-          .collection('customers')
-          .doc(widget.userId)
-          .get();
-
-      if (!customerDoc.exists || customerDoc['stripeId'] == null) {
-        throw Exception('Stripe Customer ID not found.');
-      }
-
-      final stripeId = customerDoc['stripeId'];
-
-      // Call backend to create subscription
       final response = await http.post(
-        Uri.parse('${getApiUrl()}/create-subscription'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({
-          'customerId': stripeId,
-          'priceId': 'price_1QeiMHR3km1Wsl68wd7wO6lh',
-        }),
+      Uri.parse('$ApiUrl/create-subscription'),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': 'Bearer $idToken',
+      },
+      body: json.encode({
+        'priceId': 'price_1QeiMHR3km1Wsl68wd7wO6lh',
+      }),
       );
 
       if (response.statusCode != 200) {
@@ -138,7 +77,6 @@ class _PremiumPageState extends State<PremiumPage> {
 
       final data = json.decode(response.body);
 
-      // Present the Stripe PaymentSheet
       await Stripe.instance.initPaymentSheet(
         paymentSheetParameters: SetupPaymentSheetParameters(
           paymentIntentClientSecret: data['clientSecret'],
@@ -148,7 +86,6 @@ class _PremiumPageState extends State<PremiumPage> {
 
       await Stripe.instance.presentPaymentSheet();
 
-      // Update Firestore with subscription status
       await FirebaseFirestore.instance
           .collection('customers')
           .doc(widget.userId)

@@ -21,5 +21,43 @@
   ],
   "storage": {
     "rules": "storage.rules"
+  },
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "fitopia-7f494",
+          "appId": "1:374290811690:android:1d8994fd17f31cb33a6c53",
+          "fileOutput": "android/app/google-services.json"
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "fitopia-7f494",
+          "configurations": {
+            "android": "1:374290811690:android:1d8994fd17f31cb33a6c53",
+            "ios": "1:374290811690:ios:8b488ea005973b403a6c53",
+            "macos": "1:374290811690:ios:8b488ea005973b403a6c53",
+            "web": "1:374290811690:web:69db407ea331fadb3a6c53",
+            "windows": "1:374290811690:web:6fc98b1803ec3ee73a6c53"
+          }
+        }
+      }
+    }
+  },
+  "emulators": {
+    "functions": {
+      "port": 5001
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "storage": {
+      "port": 9199
+    },
+    "ui": {
+      "enabled": true
+    },
+    "singleProjectMode": true
   }
 }

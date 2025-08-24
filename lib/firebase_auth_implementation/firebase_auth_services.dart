@@ -11,28 +11,53 @@ class FirebaseAuthService {
   final FirebaseFirestore _firestore = FirebaseFirestore.instance;
 
    // Create a new Stripe customer and save the ID to Firestore
-  Future<void> createStripeCustomer(String userId, String email) async {
+  Future<void> createStripeCustomer(String userId) async {
     try {
-      final response = await http.post(
-        Uri.parse('https://us-central1-fitopia-42331.cloudfunctions.net/api/create-customer'),
-        headers: {'Content-Type': 'application/json'},
-        body: json.encode({'email': email, 'userId': userId}),
-      );
-
-      if (response.statusCode != 200) {
-        throw Exception('Failed to create Stripe customer: ${response.body}');
+      final currentUser = _firebaseAuth.currentUser;
+      if (currentUser == null) {
+        debugPrint("Error: User is not signed in.");
+        throw Exception("User is not signed in.");
       }
 
-      final data = json.decode(response.body);
-      await _firestore
-          .collection('users')
-          .doc(userId)
-          .update({'stripeCustomerId': data['customerId']});
+      // Force refresh the token to ensure it's not stale
+      final idToken = await currentUser.getIdToken(true);
+      final email = currentUser.email;
+      final username = currentUser.displayName ?? currentUser.email;
+
+      final response = await http.post(
+        Uri.parse("https://api-3fhkguk6lq-uc.a.run.app/create-customer"),
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": "Bearer $idToken",
+        },
+        body: jsonEncode({
+          "email": email,
+          "username": username,
+        }),
+      );
+
+      if (response.statusCode == 200) {
+        final data = jsonDecode(response.body);
+        debugPrint("Stripe customer created: $data");
+
+        await FirebaseFirestore.instance.collection('customers').doc(userId).set({
+          'stripeId': data['customerId'],
+          'email': email,
+          'username': username,
+          'createdAt': FieldValue.serverTimestamp(),
+        });
+      } else {
+        debugPrint('Failed to create Stripe customer: ${response.body}');
+        throw Exception('Failed to create Stripe customer');
+      }
     } catch (e) {
-      print('Error creating Stripe customer: $e');
-      throw Exception('Failed to create Stripe customer.');
+      debugPrint('Error creating Stripe customer: $e');
+      throw Exception('Failed to create Stripe customer');
     }
   }
+
+
+
 
 // Sign up a new user
   Future<User?> signUpWithEmailAndPassword(
@@ -60,11 +85,11 @@ class FirebaseAuthService {
       });
 
       // Create a Stripe Customer
-      await createStripeCustomer(user.uid, email);
+      // await createStripeCustomer(user.uid, email, username);
 
       return user;
     } catch (e) {
-      print('Error during signup: $e');
+      debugPrint('Error during signup: $e');
       rethrow;
     }
   }
@@ -84,7 +109,7 @@ class FirebaseAuthService {
       default:
         showToast(message: 'FirebaseAuth error: ${e.message}');
     }
-    print('FirebaseAuthException: ${e.code}, ${e.message}');
+    debugPrint('FirebaseAuthException: ${e.code}, ${e.message}');
   }
 
 
@@ -105,50 +130,70 @@ class FirebaseAuthService {
         default:
           showToast(message: 'An error occurred: ${e.message}');
       }
-      print('FirebaseAuthException: ${e.code}, ${e.message}');
+      debugPrint('FirebaseAuthException: ${e.code}, ${e.message}');
     } catch (e) {
-      print('Unexpected error: $e');
+      debugPrint('Unexpected error: $e');
       showToast(message: 'An unexpected error occurred.');
     }
     return null;
   }
 
-  /// Sign in using Google credentials.
 Future<void> signInWithGoogle(BuildContext context) async {
-  final GoogleSignIn googleSignIn = GoogleSignIn();
-  try {
-    final GoogleSignInAccount? googleSignInAccount = await googleSignIn.signIn();
+  try{
 
-    if (googleSignInAccount != null) {
-      final GoogleSignInAuthentication googleAuth = await googleSignInAccount.authentication;
+    final GoogleSignInAccount? googleUser = await GoogleSignIn().signIn();
 
-      final AuthCredential credential = GoogleAuthProvider.credential(
-        idToken: googleAuth.idToken,
-        accessToken: googleAuth.accessToken,
-      );
-
-      UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
-
-      final user = userCredential.user;
-
-      if (user != null) {
-        // Always merge or set data in Firestore to ensure email is saved
-        await _firestore.collection('users').doc(user.uid).set({
-          'username': user.displayName ?? '',
-          'email': user.email ?? 'N/A', // Ensure email is saved
-          'uid': user.uid,
-          'createdAt': FieldValue.serverTimestamp(),
-        }, SetOptions(merge: true)); // Merge data if the document exists
+    if (googleUser == null) {
+        showToast(message: "Google Sign-In was canceled.");
+        return;
       }
 
-      Navigator.pushNamed(context, "/home");
+    // Obtain the auth details from the request
+    final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+
+    // Create a new credential
+    final credential = GoogleAuthProvider.credential(idToken: googleAuth.idToken,);
+
+    // Once signed in, return the UserCredential
+    UserCredential userCredential = await _firebaseAuth.signInWithCredential(credential);
+
+    final user = userCredential.user;
+    if (user != null) {
+    // await createStripeCustomer(
+    //   user.uid,
+    //   user.email ?? '',
+    //   user.displayName ?? user.uid, // use displayName or fallback to uid
+    // );
+
+      // Always merge or set data in Firestore to ensure email is saved
+      await _firestore.collection('users').doc(user.uid).set({
+        'username': user.displayName ?? '',
+        'email': user.email ?? 'N/A', // Ensure email is saved
+        'uid': user.uid,
+        'createdAt': FieldValue.serverTimestamp(),
+      }, SetOptions(merge: true)); // Merge data if the document exists
     }
-  } catch (e) {
-    print('Google Sign-In Error: $e');
-    showToast(message: "An error occurred during Google Sign-In.");
+
+      Navigator.pushNamed(context, "/home");
+  } on FirebaseAuthException catch (e) {
+      showToast(message: "Firebase Auth Error: ${e.message}");
+      debugPrint('Firebase Auth Error: $e');
+    } catch (e) {
+      debugPrint('Google Sign-In Error: $e');
+      showToast(message: "An unexpected error occurred during Google Sign-In.");
   }
 }
 
+void onUserLogin() async {
+  final user = FirebaseAuth.instance.currentUser;
+  if (user != null) {
+    // await createStripeCustomer(
+    //   user.uid,
+    //   user.email ?? '',
+    //   user.displayName ?? user.uid,
+    // );
+  }
+}
 
   /// Sign out the current user.
   Future<void> signOut() async {
@@ -157,7 +202,7 @@ Future<void> signInWithGoogle(BuildContext context) async {
       await GoogleSignIn().signOut();
       showToast(message: "Successfully signed out.");
     } catch (e) {
-      print('Sign-Out Error: $e');
+      debugPrint('Sign-Out Error: $e');
       showToast(message: "Error signing out: $e");
     }
   }

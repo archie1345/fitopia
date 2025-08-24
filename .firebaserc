@@ -1,5 +1,8 @@
 {
   "projects": {
-    "default": "fitopia-42331"
-  }
+    "default": "fitopia-7f494",
+    "fitopia": "fitopia-7f494"
+  },
+  "targets": {},
+  "etags": {}
 }

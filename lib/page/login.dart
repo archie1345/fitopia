@@ -7,7 +7,7 @@ import 'package:fitopia/widget/form_container_widget.dart';
 import 'package:fitopia/widget/toast.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'package:google_fonts/google_fonts.dart' as gfonts;
-import '../../firebase_auth_implementation/firebase_auth_services.dart';
+import '../firebase_auth_implementation/firebase_auth_services.dart';
 
 class LoginPage extends StatefulWidget {
   const LoginPage({super.key});
@@ -21,6 +21,7 @@ class _LoginPageState extends State<LoginPage> {
   final FirebaseAuthService _auth = FirebaseAuthService();
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
+  
 
   @override
   void dispose() {
@@ -271,6 +272,7 @@ class _LoginPageState extends State<LoginPage> {
   }
 
   void _signIn() async {
+    
     setState(() {
       _isSigning = true;
     });

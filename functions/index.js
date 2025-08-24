@@ -21,6 +21,7 @@ const app = express();
 
 app.use(cors({ origin: true }));
 app.use(express.json());
+app.use(bodyParser.raw({ type: "application/json" }));
 
 // Middleware: Authenticate via Firebase ID Token
 const authenticateFirebaseToken = async (req, res, next) => {

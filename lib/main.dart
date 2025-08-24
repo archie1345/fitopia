@@ -15,6 +15,7 @@ void main() async {
     await Firebase.initializeApp(
         options: DefaultFirebaseOptions.currentPlatform,);
 
+  // Start the application
   runApp(const MyApp());
 }
 
@@ -25,8 +26,7 @@ class MyApp extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       theme: ThemeData(
-        textTheme: gfonts.GoogleFonts
-            .leagueSpartanTextTheme(), // Apply font to text theme
+        textTheme: gfonts.GoogleFonts.leagueSpartanTextTheme(),
       ),
       debugShowCheckedModeBanner: false,
       title: 'Fitopia',

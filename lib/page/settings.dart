@@ -1,4 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:fitopia/classes/subscriptionService.dart';
 import 'package:fitopia/firebase_auth_implementation/firebase_auth_services.dart';
 import 'package:flutter/material.dart';
 
@@ -10,6 +12,30 @@ class SettingPage extends StatefulWidget {
 }
 
 class _SettingPageState extends State<SettingPage> {
+  Future<void> handleSignOut(BuildContext context) async {
+    try {
+      // Retrieve the current user's ID
+      final userId = FirebaseAuth.instance.currentUser?.uid;
+
+      if (userId != null) {
+        // Stop subscription service if user ID is available
+        final subscriptionService = SubscriptionService(userId: userId);
+        subscriptionService.stopSubscriptionCheck();
+      }
+
+      // Sign out the user
+      await FirebaseAuthService().signOut();
+
+      // Navigate to login screen
+      Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
+    } catch (e) {
+      print("Error during sign-out: $e");
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Failed to sign out. Please try again.")),
+      );
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -32,16 +58,12 @@ class _SettingPageState extends State<SettingPage> {
             const SizedBox(height: 16),
             Center(
               child: GestureDetector(
-                onTap: () {
-                  // Sign out logic
-                  FirebaseAuthService().signOut();
-                  Navigator.pushNamedAndRemoveUntil(context, "/login", (route) => false);
-                },
+                onTap: () => handleSignOut(context),
                 child: Container(
                   height: 40,
                   width: 120,
                   decoration: BoxDecoration(
-                    color: Color.fromRGBO(81, 75, 35, 1),
+                    color: const Color.fromRGBO(81, 75, 35, 1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: const Center(
@@ -75,7 +97,7 @@ class UserModel {
   static UserModel fromSnapshot(DocumentSnapshot<Map<String, dynamic>> snapshot) {
     return UserModel(
       username: snapshot['username'],
-      address: snapshot['adress'], // Corrected typo in 'adress' -> 'address'
+      address: snapshot['address'], // Corrected key 'adress' to 'address'
       age: snapshot['age'],
       id: snapshot['id'],
     );
@@ -86,7 +108,7 @@ class UserModel {
       "username": username,
       "age": age,
       "id": id,
-      "address": address, // Corrected typo here too
+      "address": address, // Corrected key here too
     };
   }
 }

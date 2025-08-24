@@ -55,8 +55,8 @@ class _ProfilePageState extends State<ProfilePage> {
           // Prioritize Firestore email, fallback to Firebase Auth email
           _email = userDoc['email'] ?? user.email ?? 'N/A';
           _nameController.text = userDoc['username'] ?? user.displayName ?? '';
-          _weightController.text = userDoc['weight']?.toString() ?? '';
-          _heightController.text = userDoc['height']?.toString() ?? '';
+          _weightController.text = userDoc['weight']?.toString() ?? '0';
+          _heightController.text = userDoc['height']?.toString() ?? '0';
           _birthdateController.text = userDoc['birthdate'] ?? '';
           _age = _birthdateController.text.isNotEmpty
               ? _calculateAge(_birthdateController.text)

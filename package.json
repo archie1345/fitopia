@@ -3,9 +3,15 @@
     "@google-cloud/secret-manager": "^5.6.0",
     "cors": "^2.8.5",
     "dotenv": "^16.4.7",
+<<<<<<< HEAD
     "express": "^5.1.0",
     "firebase-admin": "^13.0.2",
     "firebase-functions": "^6.4.0",
     "stripe": "^18.4.0"
+=======
+    "firebase-admin": "^13.0.2",
+    "firebase-functions": "^6.2.0",
+    "stripe": "^17.5.0"
+>>>>>>> 089c8cdbec39da78c874282cc5e85bdb1c38a459
   }
 }

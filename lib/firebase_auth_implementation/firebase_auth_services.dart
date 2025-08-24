@@ -21,6 +21,7 @@ class FirebaseAuthService {
 
       // Force refresh the token to ensure it's not stale
       final idToken = await currentUser.getIdToken(true);
+      
       final email = currentUser.email;
       final username = currentUser.displayName ?? currentUser.email;
 
@@ -55,9 +56,6 @@ class FirebaseAuthService {
       throw Exception('Failed to create Stripe customer');
     }
   }
-
-
-
 
 // Sign up a new user
   Future<User?> signUpWithEmailAndPassword(
